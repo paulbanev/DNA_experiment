@@ -89,7 +89,7 @@ bps = 0.34  # base pair spacing in nm
 #            plots()
 #            print('2ANTOOOOON')
 #            DISORDER-=1
-#    else:  
+#    else:
 #        matrixes()
 #        computations()
 #        plots()
@@ -115,7 +115,7 @@ def matrixes(DISORDER):
                         A[k1, k2] = ESpeiragmeno
                 elif k1 % 3 == 1:
                     if DISORDER in[1, 3, 5, 9]:
-                        EGkCPeiragmeno = EGkC* (1 - 0.05 * random.random() + 0.025) 
+                        EGkCPeiragmeno = EGkC* (1 - 0.05 * random.random() + 0.025)
                         A[k1, k2] = EGkCPeiragmeno
                     else:
                         EGkCPeiragmeno = EGkC
@@ -129,45 +129,45 @@ def matrixes(DISORDER):
                         A[k1, k2] = ESpeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 1 and abs(k1 - k2) == 3:
                 if DISORDER in[6, 8, 9]:
-                        tGGPeiragmeno= tGG* (1 - 0.5 * random.random() + 0.25) 
+                        tGGPeiragmeno= tGG* (1 - 0.5 * random.random() + 0.25)
                         A[k1, k2] = tGGPeiragmeno
                 else:
                         tGGPeiragmeno= tGG
-                        A[k1, k2] = tGGPeiragmeno 
+                        A[k1, k2] = tGGPeiragmeno
             elif k1 % 3 == 0 and k2 % 3 == 1 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25) 
+                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSPeiragmeno
                 else:
                     tSPeiragmeno= tS
                     A[k1, k2] = tSPeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 0 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25) 
+                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSPeiragmeno
                 else:
                     tSPeiragmeno= tS
-                    A[k1, k2] = tSPeiragmeno 
+                    A[k1, k2] = tSPeiragmeno
             elif k1 % 3 == 2 and k2 % 3 == 1 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25) 
+                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSpPeiragmeno
                 else:
                     tSpPeiragmeno= tSp
-                    A[k1, k2] = tSpPeiragmeno 
+                    A[k1, k2] = tSpPeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 2 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25) 
+                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSpPeiragmeno
                 else:
                     tSpPeiragmeno= tSp
-                    A[k1, k2] = tSpPeiragmeno 
+                    A[k1, k2] = tSpPeiragmeno
             else:
                 A[k1, k2] = 0.0
     for k1 in range(MD):
         for k2 in range(k1):
             A[k1, k2] = A[k2, k1]
-    return A                
+    return A
 
 A = matrixes(DISORDER)
 
@@ -185,7 +185,7 @@ t = np.linspace(0, 100000, L)  # time in femtoseconds
 
 
 def computations(A):
-    
+
     # Compute right eigenvectors (V) and eigenvalues (D)
     D_vals, V = np.linalg.eig(A)
 
@@ -439,12 +439,12 @@ print(results)
 plots(meanxsquares=results['mesox'], MD=MD, pr=results['participation ratio'], meantransferrate=results['mean transfer rate'])
 
 
-   
-   
-   
-   
 
-    
+
+
+
+
+
 # def elgrande(DISORDER):
 #     if DISORDER in [0,1,2,3,4,5]:
 #         matrixes(DISORDER)
