@@ -11,13 +11,13 @@ print(MD)
 
 # HOMO or LUMO?
 HL = int(input('HOMO (1) or LUMO (2) calculations: '))
-symmetry=int(input('symmetry (1) or asymmetry (2)'))
+symmetry = int(input('symmetry (1) or asymmetry (2)'))
 if HL == 1:
     print('HOMO calculations')
     ES = 9.0
     tS = 0.02
-    if symmetry==1:
-        tSp=tS
+    if symmetry == 1:
+        tSp = tS
     else: tSp = 0.16
     EGkC = 8.0
     EAkT = 8.3
@@ -61,27 +61,23 @@ elif HL == 2:
     tGC = -0.010
     tCG = -0.008
 
-
 # Constants
 h = 4.135667517  # eV·fs (Planck's constant)
 hbar = h / (2 * np.pi)  # reduced Planck's constant (eV·fs)
 eVperhbar = (2 * np.pi) / h  # 1/fs
 bps = 0.34  # base pair spacing in nm
 
-
-
 # Initialize the matrix
 
 # Ask user to input DNA sequence as a string
-#dna_input = input("Enter the DNA sequence (e.g., ATGC...): ").upper()
-#dna_seq = Seq(dna_input)
+# dna_input = input("Enter the DNA sequence (e.g., ATGC...): ").upper()
+# dna_seq = Seq(dna_input)
 
-#print("Your DNA sequence is saved as a Biopython Seq object:")
+# print("Your DNA sequence is saved as a Biopython Seq object:")
 
+# print(dna_seq)
 
-#print(dna_seq)
-
-#def disordermover(matrixes):
+# def disordermover(matrixes):
 #    if DISORDER==10:
 #        while DISORDER>0:
 #            matrixes(DISORDER)
@@ -95,11 +91,11 @@ bps = 0.34  # base pair spacing in nm
 #        plots()
 #    return{results,plots}
 
+# for now it only calculates GGGG...G
+
+DISORDER = int(input('what kind of disorder would you like, 0 for nothing, 1 for EG, 2 for ES, 3 for ES+EG, 4 for ES+ES, 5 for All energies, 6 for tG, 7 for ts, 8 for ts and tg, 9 for ALL, 10 for everything: '))
 
 
-#for now it only calculates GGGG...G
-
-DISORDER=int(input('what kind of disorder would you like, 0 for nothing, 1 for EG, 2 for ES, 3 for ES+EG, 4 for ES+ES, 5 for All energies, 6 for tG, 7 for ts, 8 for ts and tg, 9 for ALL, 10 for everything: '))
 def matrixes(DISORDER):
     A = np.zeros((MD, MD))
 
@@ -115,7 +111,7 @@ def matrixes(DISORDER):
                         A[k1, k2] = ESpeiragmeno
                 elif k1 % 3 == 1:
                     if DISORDER in[1, 3, 5, 9]:
-                        EGkCPeiragmeno = EGkC* (1 - 0.05 * random.random() + 0.025)
+                        EGkCPeiragmeno = EGkC * (1 - 0.05 * random.random() + 0.025)
                         A[k1, k2] = EGkCPeiragmeno
                     else:
                         EGkCPeiragmeno = EGkC
@@ -129,38 +125,38 @@ def matrixes(DISORDER):
                         A[k1, k2] = ESpeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 1 and abs(k1 - k2) == 3:
                 if DISORDER in[6, 8, 9]:
-                        tGGPeiragmeno= tGG* (1 - 0.5 * random.random() + 0.25)
+                        tGGPeiragmeno = tGG * (1 - 0.5 * random.random() + 0.25)
                         A[k1, k2] = tGGPeiragmeno
                 else:
-                        tGGPeiragmeno= tGG
+                        tGGPeiragmeno = tGG
                         A[k1, k2] = tGGPeiragmeno
             elif k1 % 3 == 0 and k2 % 3 == 1 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25)
+                    tSPeiragmeno = tS * (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSPeiragmeno
                 else:
-                    tSPeiragmeno= tS
+                    tSPeiragmeno = tS
                     A[k1, k2] = tSPeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 0 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSPeiragmeno= tS* (1 - 0.5 * random.random() + 0.25)
+                    tSPeiragmeno = tS * (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSPeiragmeno
                 else:
-                    tSPeiragmeno= tS
+                    tSPeiragmeno = tS
                     A[k1, k2] = tSPeiragmeno
             elif k1 % 3 == 2 and k2 % 3 == 1 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25)
+                    tSpPeiragmeno = tSp * (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSpPeiragmeno
                 else:
-                    tSpPeiragmeno= tSp
+                    tSpPeiragmeno = tSp
                     A[k1, k2] = tSpPeiragmeno
             elif k1 % 3 == 1 and k2 % 3 == 2 and abs(k1 - k2) == 1:
                 if DISORDER in[7, 8, 9]:
-                    tSpPeiragmeno= tSp* (1 - 0.5 * random.random() + 0.25)
+                    tSpPeiragmeno = tSp * (1 - 0.5 * random.random() + 0.25)
                     A[k1, k2] = tSpPeiragmeno
                 else:
-                    tSpPeiragmeno= tSp
+                    tSpPeiragmeno = tSp
                     A[k1, k2] = tSpPeiragmeno
             else:
                 A[k1, k2] = 0.0
@@ -169,15 +165,14 @@ def matrixes(DISORDER):
             A[k1, k2] = A[k2, k1]
     return A
 
+
 A = matrixes(DISORDER)
 
-#print(A)
+# print(A)
 
 # For checking eigenvalues only:
 idio = np.linalg.eigvals(A)
-#print(idio)
-
-
+# print(idio)
 
 # Time vector setup
 L = 64 * 16385  # or L = 100
@@ -199,24 +194,24 @@ def computations(A):
     W = np.conj(W)  # Conjugate as MATLAB does with A.'
 
     # Compare right and left eigenvectors
-    #DLR = V - W
+    # DLR = V - W
 
     # Print results
-    #print("Eigenvectors (Right):")
-    #print(V)
+    # print("Eigenvectors (Right):")
+    # print(V)
 
-    #print("\nEigenvectors (Left, conjugated):")
-    #print(W)
+    # print("\nEigenvectors (Left, conjugated):")
+    # print(W)
 
-    #print("\nEigenvalue matrix (diagonal):")
-    #print(D)
+    # print("\nEigenvalue matrix (diagonal):")
+    # print(D)
 
-    #print("\nDifference between right and left eigenvectors (V - W):")
-    #print(DLR)
+    # print("\nDifference between right and left eigenvectors (V - W):")
+    # print(DLR)
 
     #
     #
-    #UP TO HERE, OK
+    # UP TO HERE, OK
     #
     #
     degenerate = np.zeros(MD, dtype=int)
@@ -322,36 +317,33 @@ def computations(A):
     # In case matrix A was not Hermitian
     # (already printed earlier): print('A is not Hermitian')
 
-
     maxxsquare = np.zeros(MD)
     meanxsquares = np.zeros(MD)
     meanprob = np.zeros(MD)
 
     for k in range(MD):
-        maxxsquare[k] = np.max(xsquare[k, :])
-        meanxsquares[k] = np.mean(xsquare[k, :])
+        maxxsquare[k] = np.max(xsquare[k,:])
+        meanxsquares[k] = np.mean(xsquare[k,:])
 
         if DegeneracyFLAG == 'F':
             # No energy degeneracy
-            meanprob[k] = np.sum((c**2) * (V[k, :]**2))
+            meanprob[k] = np.sum((c ** 2) * (V[k,:] ** 2))
         elif DegeneracyFLAG == 'T':
             # With energy degeneracy
-            evol = np.sum(c[:, np.newaxis] * V[k, :, np.newaxis] * np.exp(np.outer(lambda_vals, t)), axis=0)
+            evol = np.sum(c[:, np.newaxis] * V[k,:, np.newaxis] * np.exp(np.outer(lambda_vals, t)), axis=0)
             meanprob[k] = np.mean(evol * np.conj(evol))
 
     suma = np.sum(meanxsquares)
 
     print(meanprob)
 
-    #PARTICIPATION RATIO--it works
+    # PARTICIPATION RATIO--it works
     B = V.shape[0]  # number of sites
     pr = np.zeros(V.shape[1])  # one PR per eigenvector
 
     for k in range(V.shape[1]):
         vec = V[:, k]
-        pr[k] = 1.0 / (B * np.sum(np.abs(vec)**4))
-
-
+        pr[k] = 1.0 / (B * np.sum(np.abs(vec) ** 4))
 
     # Compute the difference from mean probabilities
     # proboftminusmeanprob = xsquare - meanprob[:, np.newaxis]  # broadcasting like MATLAB's bsxfun(@minus,...)
@@ -362,7 +354,7 @@ def computations(A):
 
         for j in range(MD):
             # Find the first index where the probability rises above the mean
-            pos_indices = np.where(proboftminusmeanprob[j, :] >= 0)[0]
+            pos_indices = np.where(proboftminusmeanprob[j,:] >= 0)[0]
             if len(pos_indices) > 0:
                 index_j = pos_indices[0]
                 index[j] = index_j
@@ -390,7 +382,6 @@ def computations(A):
 
         print("Mean transfer rate per site:\n", meantransferrate)
 
-
     return{
         'idiotimes': idio,
         'pithanotites': meanprob,
@@ -399,8 +390,11 @@ def computations(A):
         'participation ratio':pr,
         'mean transfer rate':meantransferrate
         }
-results=computations(A)
+
+
+results = computations(A)
 print('eeeelamoyelaaaaamoy')
+
 
 def plots(meanxsquares, MD, pr, meantransferrate):
     # First plot: mean probabilities per site (bar plot)
@@ -424,7 +418,7 @@ def plots(meanxsquares, MD, pr, meantransferrate):
     plt.show()
 
     # Third plot: mean transfer rate per site
-    fig3, ax3=plt.subplots(figsize=(10, 6))
+    fig3, ax3 = plt.subplots(figsize=(10, 6))
     ax3.plot(range(1, len(meantransferrate) + 1), meantransferrate, marker='o', linestyle='-', color='b')
     ax3.set_yscale('log')  # Set y-axis to logarithmic scale
     ax3.set_xlabel('Site', fontsize=14)
@@ -435,15 +429,10 @@ def plots(meanxsquares, MD, pr, meantransferrate):
     plt.show()
 
     return fig, fig2, fig3  # Optional: return the figure object if needed
+
+
 print(results)
 plots(meanxsquares=results['mesox'], MD=MD, pr=results['participation ratio'], meantransferrate=results['mean transfer rate'])
-
-
-
-
-
-
-
 
 # def elgrande(DISORDER):
 #     if DISORDER in [0,1,2,3,4,5]:
