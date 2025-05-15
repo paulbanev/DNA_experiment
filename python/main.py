@@ -35,7 +35,7 @@ def main():
     #this is what is shown on the command line
     #here you give the model which will run
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
-    parser.add_argument('--length', type=int, required=True, help='Number of base-pairs')
+    parser.add_argument('--length', type=int, required=True, help='Number of base-pairs') # Later this will be changed to sequence input by user
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
     parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric',help='Choose hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
     parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
