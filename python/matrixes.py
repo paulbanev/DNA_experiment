@@ -1,7 +1,10 @@
+#matrixes
+
 import numpy as np
 import random
-
-def matrixes(length, mode, disorder_params):
+def matrixes(length, mode, disorder_params, seed=None):  # default optional
+    if seed is not None:
+        random.seed(seed)
     MD = 3 * length
     A = np.zeros((MD, MD))
 

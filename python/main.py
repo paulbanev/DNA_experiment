@@ -45,9 +45,13 @@ def main():
     results = {"idiotimes": [], "mesox": [], "participation ratio": [], "mean transfer rate": []}
 
     for run in range(num_runs):
-        seed = args.seed if args.seed is not None else run
-        disorder_params = get_disorder_model(args.disorder, args.length, seed)
-        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params)
+        if args.seed is None:
+            seed = run
+        else:
+            seed = args.seed + run  # ensure different seeds for each run
+    
+        disorder_params = get_disorder_model(args.disorder, args.length, seed=seed)
+        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params, seed=seed)
         metrics = run_simulation_once(A, MD, eVperhbar, t)
 
         results["idiotimes"].append(metrics["idiotimes"])
