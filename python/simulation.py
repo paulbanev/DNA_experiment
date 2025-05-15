@@ -1,6 +1,5 @@
 import numpy as np
 from Bio.Seq import Seq
-import matplotlib.pyplot as plt
 import random
 
 # Determine the matrix to be diagonalized
