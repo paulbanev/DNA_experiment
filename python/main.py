@@ -1,10 +1,47 @@
+# main.py
 import argparse
+import numpy as np
+from matrixes import matrixes
+from disorder import get_disorder_model
+from analysis import computations
 
-parser = argparse.ArgumentParser(description="Run Fishbone DNA Hole Transport Simulation")
-parser.add_argument('--length', type=int, required=True, help='Number of base-pairs')
-parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='HOMO or LUMO calculation')
-parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0-10)')
 
-args = parser.parse_args()
+def run_simulation_once(A, MD, eVperhbar, t):
+    return computations(A, MD, eVperhbar, t)
 
-print(args.length, args.mode, args.disorder)
+def print_summary_stats(results):
+    print("\nSummary Statistics:")
+    for key, values in results.items():
+        values = np.array(values)
+        mean_val = np.mean(values)
+        std_val = np.std(values)
+        print(f"{key}: Mean = {mean_val:.4f}, Std Dev = {std_val:.4f}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
+    parser.add_argument('--length', type=int, required=True, help='Number of base-pairs')
+    parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
+    parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
+    parser.add_argument('--seed', type=int, default=None, help='Random seed for disorder')
+    args = parser.parse_args()
+
+    t = np.linspace(0, 100000, 64 * 16385)
+
+    num_runs = 10 if args.disorder != 0 else 1
+    results = {"idiotimes": [], "mesox": [], "participation ratio": [], "mean transfer rate": []}
+
+    for run in range(num_runs):
+        seed = args.seed if args.seed is not None else run
+        disorder_params = get_disorder_model(args.disorder, args.length, seed)
+        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params)
+        metrics = run_simulation_once(A, MD, eVperhbar, t)
+
+        results["idiotimes"].append(metrics["idiotimes"])
+        results["mesox"].append(metrics["mesox"])
+        results["participation ratio"].append(metrics["participation ratio"])
+        results["mean transfer rate"].append(metrics["mean transfer rate"])
+
+    print_summary_stats(results)
+
+if __name__ == '__main__':
+    main()
