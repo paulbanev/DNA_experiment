@@ -4,7 +4,7 @@
 # Later more values for different polymers will be added
 import numpy as np
 import random
-def matrixes(length, mode, disorder_params, seed=None):  
+def matrixes(length, mode, disorder_params, seed=None, symmetry='symmetric'):  
     if seed is not None:
         random.seed(seed)
     MD = 3 * length
@@ -14,14 +14,14 @@ def matrixes(length, mode, disorder_params, seed=None):
     if mode == "HOMO":
         ES = 9.0
         tS = 0.02
-        tSp = disorder_params.get("tsp_disorder", tS)
+        tSp = tS if symmetry == 'symmetric' else 0.16
         EGkC = 8.0
         EAkT = 8.3
         tGG = 0.1
     elif mode == "LUMO":
         ES = 0.0
         tS = 0.0
-        tSp = disorder_params.get("tsp_disorder", tS)
+        tSp = tS if symmetry == 'symmetric' else 0.0
         EGkC = -4.5
         EAkT = -4.9
         tGG = 0.020

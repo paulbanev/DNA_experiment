@@ -37,6 +37,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
     parser.add_argument('--length', type=int, required=True, help='Number of base-pairs')
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
+    parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric',help='Choose hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
     parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
     parser.add_argument('--seed', type=int, default=None, help='Random seed for disorder')
     args = parser.parse_args()
@@ -57,7 +58,7 @@ def main():
             seed = args.seed + run  # ensure different seeds for each run. Meaning fresh randomness each time
     
         disorder_params = get_disorder_model(args.disorder, args.length, seed=seed)
-        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params, seed=seed)
+        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params, seed=seed, symmetry=args.symmetry)
         metrics = run_simulation_once(A, MD, eVperhbar, t)
 
         results["idiotimes"].append(metrics["idiotimes"])
