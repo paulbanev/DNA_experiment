@@ -49,7 +49,7 @@ def main():
 #otherwise the program is executed 10 times and you get the average value of each element of the arrays representing the quantities studied
 # aswell as their standard deviation errors. find more in utils.py
     num_runs = 10 if args.disorder != 0 else 1
-    results = {"idiotimes": [], "mesox": [], "participation ratio": [], "mean transfer rate": []}
+    results = {"idiotimes": [], "pithanotites": [], "participation ratio": [], "mean transfer rate": []}
 
     for run in range(num_runs):
         if args.seed is None:
@@ -62,7 +62,7 @@ def main():
         metrics = run_simulation_once(A, MD, eVperhbar, t)
 
         results["idiotimes"].append(metrics["idiotimes"])
-        results["mesox"].append(metrics["mesox"])
+        results["pithanotites"].append(metrics["pithanotites"])
         results["participation ratio"].append(metrics["participation ratio"])
         results["mean transfer rate"].append(metrics["mean transfer rate"])
 
