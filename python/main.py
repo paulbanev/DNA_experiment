@@ -13,9 +13,23 @@ def print_summary_stats(results):
     print("\nSummary Statistics:")
     for key, values in results.items():
         values = np.array(values)
-        mean_val = np.mean(values)
-        std_val = np.std(values)
-        print(f"{key}: Mean = {mean_val:.4f}, Std Dev = {std_val:.4f}")
+
+        # Take only real parts if complex
+        values = np.real(values)
+
+        if values.ndim == 1 or values.shape[0] == 1:
+            # Single run or 1D results, print elements directly
+            arr = values if values.ndim == 1 else values[0]
+            print(f"{key}:")
+            for i, v in enumerate(arr):
+                print(f"  Element {i}: {v:.4f}")
+        else:
+            # Multiple runs, element-wise average and std dev
+            mean_vals = np.mean(values, axis=0)
+            std_vals = np.std(values, axis=0)
+            print(f"{key}:")
+            for i, (m, s) in enumerate(zip(mean_vals, std_vals)):
+                print(f"  Element {i}: {m:.4f} ± {s:.4f}")
 
 def main():
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
