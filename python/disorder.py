@@ -1,4 +1,7 @@
 # disorder.py
+#here we map which polymer parameters( site energies or hopping intervals) will be disturbed by the disorder_type
+# in general we disturb energies by 5% and intervals by 50%.
+#here we get the apropriate percentile which we implement in matrixes.py to get the desired fluctuations around the bibliographical value. 
 import random
 
 def get_disorder_model(disorder_type, length, seed=None):

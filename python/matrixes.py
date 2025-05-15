@@ -1,8 +1,10 @@
 #matrixes
-
+#Here the matrix describing our problem is created and filled. This is the basis upon which analysis.py runs
+#for now we only calculate GGGG...GG homopolymers. Thus only the needed HOMO & LUMO values are seen.
+# Later more values for different polymers will be added
 import numpy as np
 import random
-def matrixes(length, mode, disorder_params, seed=None):  # default optional
+def matrixes(length, mode, disorder_params, seed=None):  
     if seed is not None:
         random.seed(seed)
     MD = 3 * length
@@ -31,6 +33,8 @@ def matrixes(length, mode, disorder_params, seed=None):  # default optional
     eVperhbar = (2 * np.pi) / h
 
     # Matrix population
+    # Here you can see the usage of the percentiles created in disorder.py
+    # You can change the random generator from gaussian to something else if you want 
     for k1 in range(MD):
         for k2 in range(k1, MD):
             if k1 == k2:
@@ -53,7 +57,7 @@ def matrixes(length, mode, disorder_params, seed=None):  # default optional
             else:
                 A[k1, k2] = 0.0
 
-    # Symmetrize
+    # Symmetrize. Important to assure that it will be Hamiltonian
     for k1 in range(MD):
         for k2 in range(k1):
             A[k1, k2] = A[k2, k1]

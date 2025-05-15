@@ -24,7 +24,7 @@ def print_summary_stats(results):
             for i, v in enumerate(arr):
                 print(f"  Element {i}: {v:.4f}")
         else:
-            # Multiple runs, element-wise average and std dev
+            # Multiple runs, element-wise average and std dev. See comment below
             mean_vals = np.mean(values, axis=0)
             std_vals = np.std(values, axis=0)
             print(f"{key}:")
@@ -32,6 +32,8 @@ def print_summary_stats(results):
                 print(f"  Element {i}: {m:.4f} ± {s:.4f}")
 
 def main():
+    #this is what is shown on the command line
+    #here you give the model which will run
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
     parser.add_argument('--length', type=int, required=True, help='Number of base-pairs')
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
@@ -41,6 +43,10 @@ def main():
 
     t = np.linspace(0, 100000, 64 * 16385)
 
+#if you run for no disorder, the program is executed once
+#for now you can save the results manually to have a baseline
+#otherwise the program is executed 10 times and you get the average value of each element of the arrays representing the quantities studied
+# aswell as their standard deviation errors. find more in utils.py
     num_runs = 10 if args.disorder != 0 else 1
     results = {"idiotimes": [], "mesox": [], "participation ratio": [], "mean transfer rate": []}
 
@@ -48,7 +54,7 @@ def main():
         if args.seed is None:
             seed = run
         else:
-            seed = args.seed + run  # ensure different seeds for each run
+            seed = args.seed + run  # ensure different seeds for each run. Meaning fresh randomness each time
     
         disorder_params = get_disorder_model(args.disorder, args.length, seed=seed)
         A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params, seed=seed)

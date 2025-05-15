@@ -42,9 +42,10 @@ def computations(A, MD, eVperhbar, t):
             print("The sum of periodic functions is NOT generally a periodic function.")
 
     # Determine initial conditions
+    # Meaning where the hole(HOMO) or electron (LUMO) is placed in the polymer
     print("\nDetermine Initial Conditions")
     x0 = np.zeros(MD)
-    x0[1] = 1  # x0(2) in MATLAB
+    x0[1] = 1  # First base-pair
 
     # Find coefficients c using numerically stable solve
     ca = np.linalg.solve(V, x0)
