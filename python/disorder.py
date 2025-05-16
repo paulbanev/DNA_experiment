@@ -14,7 +14,7 @@ def get_disorder_model(disorder_type, length, seed=None):
     if disorder_type == 1:
         return {"eg_disorder": 0.05}
     elif disorder_type == 2:
-        return {"es_disorder": 0.05}
+        return {"es_disorder": 0.05}#for now, both sides are disturbed, there is no ES choice, just ES+ES
     elif disorder_type == 3:
         return {"es_disorder": 0.05, "eg_disorder": 0.05}
     elif disorder_type == 6:
@@ -31,7 +31,7 @@ def get_disorder_model(disorder_type, length, seed=None):
             "tg_disorder": 0.5,
             "tsp_disorder": 0.5
         }
-    elif disorder_type == 10:
+    elif disorder_type == 10:# This is the same as 9. It exists so that we can use the input "10" to run the 10-9-8-...3-2-1-0 experiment. meaning all possible types in the same run
         return {
             "es_disorder": 0.05,
             "eg_disorder": 0.05,
