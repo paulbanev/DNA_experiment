@@ -40,6 +40,8 @@ def main():
     parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric',help='Choose hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
     parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
     parser.add_argument('--seed', type=int, default=None, help='Random seed for disorder')
+    parser.add_argument('--export', action='store_true', help='Export results to Excel')
+
     args = parser.parse_args()
 
     t = np.linspace(0, 100000, 64 * 16385)
@@ -67,6 +69,10 @@ def main():
         results["mean transfer rate"].append(metrics["mean transfer rate"])
 
     print_summary_stats(results)
+    if args.export:
+        from export_results import export_to_excel
+        export_to_excel(results)
+        print("Results exported to Excel.")
 
 if __name__ == '__main__':
     main()
