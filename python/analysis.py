@@ -4,12 +4,19 @@ import numpy as np
 def computations(A, MD, eVperhbar, t):
     # For checking eigenvalues only:
     idio = np.linalg.eigvals(A)
+    # We sort them to be in accordace toprevious matlab results. just a formalisation
+    idx = idio.argsort()
+    idio_sorted = idio[idx]
+
     
     # Compute right eigenvectors (V) and eigenvalues (D)
     D_vals, V = np.linalg.eig(A)
     idx = D_vals.argsort()
     D = np.diag(D_vals[idx])
     V = V[:, idx]
+
+    #normalize the vectors after sorting. matlab does it automatically with eig(A)
+    V = V / np.linalg.norm(V, axis=0, keepdims=True)
 
     # Compute left eigenvectors (W): eigenvectors of A transpose
     D_trans_vals, W = np.linalg.eig(A.T)
@@ -160,10 +167,10 @@ def computations(A, MD, eVperhbar, t):
     print("Mean transfer rate per site:\n", meantransferrate)
 
     return {
-        'idiotimes': idio,
-        'pithanotites': meanprob,
+        'idiotimes': idio_sorted,
+        'pithanotites': meanprob.real,
         'pinakas': A,
         'mesox': meanxsquares,
         'participation ratio': pr,
-        'mean transfer rate': meantransferrate
+        'mean transfer rate': meantransferrate.real
     }
