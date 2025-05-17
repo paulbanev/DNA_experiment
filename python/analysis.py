@@ -11,12 +11,17 @@ def computations(A, MD, eVperhbar, t):
     
     # Compute right eigenvectors (V) and eigenvalues (D)
     D_vals, V = np.linalg.eig(A)
+
+    #normalize the eigenvectors before sorting. matlab does it automatically with eig(A)
+    V = V / np.linalg.norm(V, axis=0, keepdims=True)
+
     idx = D_vals.argsort()
     D = np.diag(D_vals[idx])
     V = V[:, idx]
 
-    #normalize the vectors after sorting. matlab does it automatically with eig(A)
-    V = V / np.linalg.norm(V, axis=0, keepdims=True)
+    print("\nEigenvector matrix V (columns are eigenvectors):")
+    np.set_printoptions(precision=4, suppress=True)  # Optional: for readability
+    print(V)
 
     # Compute left eigenvectors (W): eigenvectors of A transpose
     D_trans_vals, W = np.linalg.eig(A.T)
@@ -130,9 +135,7 @@ def computations(A, MD, eVperhbar, t):
     # PARTICIPATION RATIO
     B = V.shape[0]  # number of sites
     pr = np.zeros(V.shape[1])
-    for k in range(V.shape[1]):
-        vec = V[:, k]
-        pr[k] = 1.0 / (B * np.sum(np.abs(vec) ** 4))
+    pr = 1.0 / (B * np.sum(np.abs(V) ** 4, axis=0))
 
     # Compute difference from mean probabilities
     proboftminusmeanprob = xsquare - meanprob[:, np.newaxis]
@@ -172,5 +175,6 @@ def computations(A, MD, eVperhbar, t):
         'pinakas': A,
         'mesox': meanxsquares,
         'participation ratio': pr,
-        'mean transfer rate': meantransferrate.real
+        'mean transfer rate': meantransferrate.real,
+        'eigenvector matrix': V
     }

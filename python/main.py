@@ -12,24 +12,30 @@ def run_simulation_once(A, MD, eVperhbar, t):
 def print_summary_stats(results):
     print("\nSummary Statistics:")
     for key, values in results.items():
+        if key == "eigenvector matrix":
+            continue  # Avoid printing large matrices
+
         values = np.array(values)
 
         # Take only real parts if complex
         values = np.real(values)
 
+        print(f"{key}:")
         if values.ndim == 1 or values.shape[0] == 1:
-            # Single run or 1D results, print elements directly
             arr = values if values.ndim == 1 else values[0]
-            print(f"{key}:")
             for i, v in enumerate(arr):
-                print(f"  Element {i}: {v:.4f}")
+                if np.isscalar(v):
+                    print(f"  Element {i}: {v:.4f}")
+                else:
+                    print(f"  Element {i}: {v}")  # fallback for array values
         else:
-            # Multiple runs, element-wise average and std dev. See comment below
             mean_vals = np.mean(values, axis=0)
             std_vals = np.std(values, axis=0)
-            print(f"{key}:")
             for i, (m, s) in enumerate(zip(mean_vals, std_vals)):
-                print(f"  Element {i}: {m:.4f} ± {s:.4f}")
+                if np.isscalar(m) and np.isscalar(s):
+                    print(f"  Element {i}: {m:.4f} ± {s:.4f}")
+                else:
+                    print(f"  Element {i}: {m} ± {s}")  # fallback for array values
 
 def main():
     #this is what is shown on the command line
@@ -51,7 +57,7 @@ def main():
 #otherwise the program is executed 10 times and you get the average value of each element of the arrays representing the quantities studied
 # aswell as their standard deviation errors. find more in utils.py
     num_runs = 10 if args.disorder != 0 else 1
-    results = {"idiotimes": [], "pithanotites": [], "participation ratio": [], "mean transfer rate": []}
+    results = {"idiotimes": [], "pithanotites": [], "participation ratio": [], "mean transfer rate": [], "eigenvector matrix": []}
 
     for run in range(num_runs):
         if args.seed is None:
@@ -67,6 +73,8 @@ def main():
         results["pithanotites"].append(metrics["pithanotites"])
         results["participation ratio"].append(metrics["participation ratio"])
         results["mean transfer rate"].append(metrics["mean transfer rate"])
+        results["eigenvector matrix"].append(metrics["eigenvector matrix"])
+
 
     print_summary_stats(results)
     if args.export:
