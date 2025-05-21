@@ -1,8 +1,6 @@
 %matrixes
 %adding things for tests
 
-if type==1
-    
 % type alpha' under construction
 %# START OF poly(dG)-poly(dC) or poly(dA)-poly(dT)
 %*(1-0.5*rand+0.25)
