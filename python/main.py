@@ -4,6 +4,7 @@ import numpy as np
 from matrixes import matrixes
 from disorder import get_disorder_model
 from analysis import computations
+from sequence import sequence_properties, validate_sequence
 
 
 def run_simulation_once(A, MD, eVperhbar, t):
@@ -42,6 +43,7 @@ def main():
     #here you give the model which will run
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
     parser.add_argument('--length', type=int, required=True, help='Number of base-pairs') # Later this will be changed to sequence input by user
+    parser.add_argument('--sequence', type=str, required=True, help='Give one side of your polymer. Since we work on basepair for now no need for the second')
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
     parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric',help='Choose hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
     parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
@@ -66,7 +68,9 @@ def main():
             seed = args.seed + run  # ensure different seeds for each run. Meaning fresh randomness each time
     
         disorder_params = get_disorder_model(args.disorder, args.length, seed=seed)
-        A, MD, eVperhbar = matrixes(args.length, args.mode, disorder_params, seed=seed, symmetry=args.symmetry)
+        validated_seq = validate_sequence(args.sequence)
+        Ebp, tbb = sequence_properties(validated_seq, args.mode)
+        A, MD, eVperhbar = matrixes(Ebp, tbb, disorder_params, validated_seq, mode=args.mode, seed=seed, symmetry=args.symmetry)
         metrics = run_simulation_once(A, MD, eVperhbar, t)
 
         results["idiotimes"].append(metrics["idiotimes"])
