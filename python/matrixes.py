@@ -3,12 +3,12 @@
 
 import numpy as np
 import random
-def matrixes(Ebp, tbb, disorder_params, sequence, mode, seed=None,  symmetry='symmetric'):  
+def matrixes(Ebp, tbb, disorder_params, sequence, mode, seed=None,  symmetry='symmetric'): 
     if seed is not None:
         random.seed(seed)
     length = len(sequence)
     MD = 3 * length
-    A = np.zeros((MD, MD))
+    A = np.zeros((MD, MD), dtype=np.float64)
 
     # HOMO or LUMO setup
     if mode == "HOMO":
@@ -21,10 +21,6 @@ def matrixes(Ebp, tbb, disorder_params, sequence, mode, seed=None,  symmetry='sy
         tSp = tS if symmetry == 'symmetric' else 0.0
     else:
         raise ValueError("Mode must be 'HOMO' or 'LUMO'")
-
-    h = 4.135667517  # eV·fs
-    hbar = h / (2 * np.pi)
-    eVperhbar = (2 * np.pi) / h
 
     # Matrix population
     # Here you can see the usage of the percentiles created in disorder.py
@@ -57,4 +53,4 @@ def matrixes(Ebp, tbb, disorder_params, sequence, mode, seed=None,  symmetry='sy
         for k2 in range(k1):
             A[k1, k2] = A[k2, k1]
 
-    return A, MD, eVperhbar
+    return A, MD

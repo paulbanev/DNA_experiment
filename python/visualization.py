@@ -1,37 +1,86 @@
+import os
+import numpy as np
 import matplotlib.pyplot as plt
 
+def save_plots(results, output_dir="results"):
+    os.makedirs(output_dir, exist_ok=True)
 
-def plots(meanxsquares, MD, pr, meantransferrate):
-    # First plot: mean probabilities per site (bar plot)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(range(1, MD + 1), meanxsquares)
-    ax.set_ylabel(r'mean probability', fontsize=30)
-    ax.set_xlabel(r'site', fontsize=30)
-    ax.tick_params(axis='both', labelsize=18)
+    # Convert lists to arrays
+    idio=np.array(results["idiotimes"])
+    pr = np.array(results["participation ratio"])
+    mean_prob = np.array(results["pithanotites"])
+    mean_trans = np.array(results["mean transfer rate"])
+    dmx = np.array(results.get("x axis dipole moment", []))
+    dmy = np.array(results.get("y axis dipole moment", []))
+
+    pr_mean = np.mean(pr, axis=0)
+    pr_err = np.std(pr, axis=0)
+    mean_prob_mean = np.mean(mean_prob, axis=0)
+    mean_prob_err = np.std(mean_prob, axis=0)
+    mean_trans_mean = np.mean(mean_trans, axis=0)
+    mean_trans_err = np.std(mean_trans, axis=0)
+
+    x_vals = np.arange(1, len(pr_mean) + 1)
+
+    # --- Idiosynchronous Energies (Eigenvalues) ---
+    if "idiotimes" in results:
+        idio = np.array(results["idiotimes"])
+        idio_mean = np.mean(idio, axis=0)
+        idio_err = np.std(idio, axis=0)
+        x_vals = np.arange(1, len(idio_mean) + 1)
+
+        fig, ax = plt.subplots()
+        ax.errorbar(x_vals, idio_mean, yerr=idio_err, fmt='o', capsize=3)
+        ax.set_title("Eigenvalue Spectrum (Idiosynchronous Energies)")
+        ax.set_xlabel("Eigenstate Index")
+        ax.set_ylabel("Energy (eV)")
+        ax.grid(True)
+        fig.tight_layout()
+        fig.savefig(os.path.join(output_dir, "eigenvalue_spectrum.png"))
+        plt.close(fig)
+
+    # --- Participation Ratio ---
+    fig, ax = plt.subplots()
+    ax.errorbar(x_vals, pr_mean, yerr=pr_err, fmt='-o', capsize=3)
+    ax.set_title("Participation Ratio")
+    ax.set_xlabel("Eigenvector Index")
+    ax.set_ylabel("PR")
     ax.grid(True)
-    fig.tight_layout()
-    plt.show()
+    fig.savefig(os.path.join(output_dir, "participation_ratio.png"))
+    plt.close(fig)
 
-    # Second plot: participation ratio (line + dots)
-    fig2, ax2 = plt.subplots(figsize=(10, 6))
-    ax2.plot(range(1, len(pr) + 1), pr, marker='o', linestyle='-', color='b')
-    ax2.set_xlabel('Eigenvector index', fontsize=14)
-    ax2.set_ylabel('Participation Ratio (PR)', fontsize=14)
-    ax2.set_title('Participation Ratio per Eigenstate', fontsize=16)
-    ax2.grid(True)
-    fig2.tight_layout()
-    plt.show()
+    # --- Mean Probabilities ---
+    fig, ax = plt.subplots()
+    ax.bar(x_vals, mean_prob_mean, yerr=mean_prob_err, capsize=3)
+    ax.set_title("Mean Probability per Site")
+    ax.set_xlabel("Site Index")
+    ax.set_ylabel("Mean Probability")
+    ax.grid(True)
+    fig.savefig(os.path.join(output_dir, "mean_probability.png"))
+    plt.close(fig)
 
-    # Third plot: mean transfer rate per site
-    fig3, ax3 = plt.subplots(figsize=(10, 6))
-    ax3.plot(range(1, len(meantransferrate) + 1), meantransferrate, marker='o', linestyle='-', color='b')
-    ax3.set_yscale('log')  # Set y-axis to logarithmic scale
-    ax3.set_xlabel('Site', fontsize=14)
-    ax3.set_ylabel('Mean Transfer Rate (log scale)', fontsize=14)
-    ax3.set_title('Mean Transfer Rate per Site', fontsize=16)
-    ax3.grid(True, which="both", ls='--', linewidth=0.5)
-    fig3.tight_layout()
-    plt.show()
+    # --- Mean Transfer Rate ---
+    fig, ax = plt.subplots()
+    ax.errorbar(x_vals, mean_trans_mean, yerr=mean_trans_err, fmt='-o', capsize=3)
+    ax.set_yscale("log")
+    ax.set_title("Mean Transfer Rate (log scale)")
+    ax.set_xlabel("Site Index")
+    ax.set_ylabel("Transfer Rate")
+    ax.grid(True, which='both', ls='--')
+    fig.savefig(os.path.join(output_dir, "mean_transfer_rate.png"))
+    plt.close(fig)
 
-    return fig, fig2, fig3  # Optional: return the figure object if needed
-
+    # --- Dipole Moment (if available) ---
+    if dmx.size and dmy.size:
+        dmx_mean = np.mean(dmx, axis=0)
+        dmy_mean = np.mean(dmy, axis=0)
+        fig, ax = plt.subplots()
+        ax.plot(dmx_mean, label='dmx')
+        ax.plot(dmy_mean, label='dmy')
+        ax.set_title("Dipole Moment vs Time")
+        ax.set_xlabel("Time Index")
+        ax.set_ylabel("Dipole Moment [a.u.]")
+        ax.legend()
+        ax.grid(True)
+        fig.savefig(os.path.join(output_dir, "dipole_moment.png"))
+        plt.close(fig)

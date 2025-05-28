@@ -1,7 +1,7 @@
 #analysis
 import numpy as np
 
-def computations(A, MD, eVperhbar, t):
+def computations(A, MD, eVperhbar, t, L, h):
     # For checking eigenvalues only:
     idio = np.linalg.eigvals(A)
     # We sort them to be in accordace toprevious matlab results. just a formalisation
@@ -113,14 +113,14 @@ def computations(A, MD, eVperhbar, t):
         x += c[k] * np.outer(V[:, k], np.exp(lambda_vals[k] * t))
 
     # Compute square norms and sums
-    xsquare = x * np.conj(x)
+    xsquare = np.abs(x)**2
     summ = np.sum(xsquare, axis=0)
 
     maxxsquare = np.max(xsquare, axis=1)
     meanxsquares = np.mean(xsquare, axis=1)
     
     # Initialize meanprob as complex to avoid warnings later
-    meanprob = np.zeros(MD, dtype=complex)
+    meanprob = np.zeros(MD, dtype=np.float64)
 
     for k in range(MD):
         if DegeneracyFLAG == 'F':
@@ -142,8 +142,8 @@ def computations(A, MD, eVperhbar, t):
     index = np.zeros(MD, dtype=int)
     
     # Initialize these as complex to avoid casting warnings
-    R = np.zeros(MD, dtype=complex)
-    tmean = np.zeros(MD, dtype=complex)
+    R = np.zeros(MD, dtype=np.float64)
+    tmean = np.zeros(MD, dtype=np.float64)
 
     for j in range(MD):
         pos_indices = np.where(proboftminusmeanprob[j, :] >= 0)[0]
@@ -163,11 +163,89 @@ def computations(A, MD, eVperhbar, t):
             R[j] = 0
             tmean[j] = meanprob[j]  # physically irrelevant case
 
-    meantransferrate = np.zeros(MD, dtype=complex)
+    meantransferrate = np.zeros(MD, dtype=np.float64)
     nonzero_mask = tmean != 0
     meantransferrate[nonzero_mask] = meanprob[nonzero_mask] / tmean[nonzero_mask]
 
     print("Mean transfer rate per site:\n", meantransferrate)
+
+
+    #DIPOLE MOMENT CALCULATIONS
+    a0 = 0.52917721067  # Bohr radius in Å
+    factor_x = 3.4 / a0
+    factor_y = 10 / a0
+
+    if (MD // 3) % 2 == 0:
+        xcenter = (MD // 3) // 2 + 0.5
+    else:
+        xcenter = (MD // 3) // 2 + 1
+    ycenter = 2
+
+    dmx = np.zeros_like(t)
+    dmy = np.zeros_like(t)
+
+    for beta in range(1, MD + 1):
+        sigma = beta % 3 or 3
+        nu = 1 + (beta - sigma) // 3
+        idx = beta - 1
+
+        dmx += (nu - xcenter) * factor_x * xsquare[idx, :]
+        dmy += (sigma - ycenter) * factor_y * xsquare[idx, :]
+    #dipole momens calculated
+
+      #let's calculate the dipole moment fast fourier transform--dmFFT
+    L = len(t)
+    dmFs = (L - 1) / t[-1]  # Sampling frequency (inverse of dt)
+    dmNFFT = 2 ** int(np.ceil(np.log2(L)))  # Next power of 2 from L
+
+    dmYY1 = np.fft.fft(dmx, dmNFFT) / L  # FFT of the dipole moment x-component
+    dmf1 = dmFs / 2 * np.linspace(0, 1, dmNFFT // 2 + 1)  # Frequency vector
+
+   
+    dmYY2 = np.fft.fft(dmy, dmNFFT) / L  # FFT of the dipole moment y-component
+    dmf2 = dmFs / 2 * np.linspace(0, 1, dmNFFT // 2 + 1)  # Frequency vector
+
+    
+    num_pairs = MD * (MD - 1) // 2
+    freqs = np.zeros(num_pairs)
+    FC = np.zeros((MD, num_pairs), dtype=complex)
+    
+    # Step 1: Build frequency array and FC matrix
+    l = 0
+    for i in range(MD):
+        for j in range(i + 1, MD):
+            freqs[l] = (D[j, j] - D[i, i]) / h
+            FC[:, l] = c[i] * V[:, i] * c[j] * V[:, j]
+            l += 1
+
+    # Step 2: Round to eliminate degeneracy issues (to ~1e-12 precision)
+    rounded_freqs = np.round(freqs * 1e12) / 1e12
+    uniquefreqs, unique_indices = np.unique(rounded_freqs, return_index=True)
+    rest_indices = np.setdiff1d(np.arange(len(freqs)), unique_indices)
+
+    # Step 3: Aggregate degenerate frequency amplitudes
+    for i in unique_indices:
+        for j in rest_indices:
+            if np.isclose(rounded_freqs[i], rounded_freqs[j]):
+                FC[:, i] += FC[:, j]
+
+    # Step 4: Extract unique FCs and convert frequency units to THz
+    unique_FC = FC[:, unique_indices]
+    uniquefreqs *= 1000  # to THz
+    FCamp = 2 * np.abs(unique_FC)
+
+    # Step 5: Total Weighted Mean Frequency
+    FCamp[:, 0] = 0  # Clear DC component
+    WMF = np.zeros(MD)
+    TWMF = 0.0
+    for i in range(MD):
+        if np.sum(FCamp[i, :]) != 0:
+            WMF[i] = np.sum(uniquefreqs * FCamp[i, :]) / np.sum(FCamp[i, :])
+        TWMF += WMF[i] * meanprob[i]
+    TWMF_per_MD = TWMF / MD
+
+   
+    
 
     return {
         'idiotimes': idio_sorted,
@@ -176,5 +254,9 @@ def computations(A, MD, eVperhbar, t):
         'mesox': meanxsquares,
         'participation ratio': pr,
         'mean transfer rate': meantransferrate.real,
-        'eigenvector matrix': V
+        'eigenvector matrix': V,
+        'x axis dipole moment': dmx,
+        'y axis dipole moment': dmy,
+        'total weighted mean frequency': TWMF    
     }
+

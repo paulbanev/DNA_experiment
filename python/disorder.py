@@ -4,7 +4,7 @@
 #here we get the apropriate percentile which we implement in matrixes.py to get the desired fluctuations around the bibliographical value. 
 import random
 
-def get_disorder_model(disorder_type, length, seed=None):
+def get_disorder_model(disorder_type, seed=None):
     if seed is not None:
         random.seed(seed)
 
