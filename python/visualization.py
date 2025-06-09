@@ -12,6 +12,8 @@ def save_plots(results, output_dir="results"):
     mean_trans = np.array(results["mean transfer rate"])
     dmx = np.array(results.get("x axis dipole moment", []))
     dmy = np.array(results.get("y axis dipole moment", []))
+    mesithesi = np.array(results.get("mesi thesi", []))
+    count = np.array(results.get("count", []))
 
     pr_mean = np.mean(pr, axis=0)
     pr_err = np.std(pr, axis=0)
@@ -83,4 +85,16 @@ def save_plots(results, output_dir="results"):
         ax.legend()
         ax.grid(True)
         fig.savefig(os.path.join(output_dir, "dipole_moment.png"))
+        plt.close(fig)
+    
+        # --- Density of States (DOS) calculation and plot ---
+          # number of points for DOS bins; you can change this or make it input if you want
+        fig, ax = plt.subplots()
+        ax.fill_between(mesithesi, count)
+        ax.set_ylabel('DOS (a.u.)')
+        ax.set_xlabel('Energy (eV)')
+        ax.set_title("Density of States (DOS)")
+        ax.grid(True)
+        fig.tight_layout()
+        fig.savefig(os.path.join(output_dir, "density_of_states.png"))
         plt.close(fig)

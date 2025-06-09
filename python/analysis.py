@@ -1,7 +1,7 @@
 #analysis
 import numpy as np
 
-def computations(A, MD, eVperhbar, t, L, h):
+def computations(NN, A, MD, eVperhbar, t, L, h):
     # For checking eigenvalues only:
     idio = np.linalg.eigvals(A)
     # We sort them to be in accordace toprevious matlab results. just a formalisation
@@ -112,6 +112,41 @@ def computations(A, MD, eVperhbar, t, L, h):
     for k in range(MD):
         x += c[k] * np.outer(V[:, k], np.exp(lambda_vals[k] * t))
 
+            # start of Density of States (DOS) calculation
+    DOSFLAG = 'T'
+    if DOSFLAG == 'T':
+
+        thesi = np.zeros(NN)
+
+        if idio[0] < 0:
+            thesi[0] = 1.01 * idio[0]
+            thesi[-1] = 0.99 * idio[MD-1]
+            step = (thesi[-1] - thesi[0]) / (NN - 1)
+        elif idio[0] > 0:
+            thesi[0] = 0.99 * idio[0]
+            thesi[-1] = 1.01 * idio[MD-1]
+            step = (thesi[-1] - thesi[0]) / (NN - 1)
+
+        for j in range(NN):
+            thesi[j] = thesi[0] + j * step
+
+        count = np.zeros(NN-1)
+
+        for i in range(MD):
+            for j in range(NN-1):
+                if (idio[i] > thesi[j]) and (idio[i] <= thesi[j+1]):
+                    count[j] += 1
+
+        count = count / (MD * step)
+
+        mesithesi = np.zeros(NN-1)
+        if np.min(idio) > 0:
+            for j in range(NN-1):
+                mesithesi[j] = -(thesi[j+1] + thesi[j]) / 2
+        elif np.min(idio) < 0:
+            for j in range(NN-1):
+                mesithesi[j] = (thesi[j+1] + thesi[j]) / 2
+
     # Compute square norms and sums
     xsquare = np.abs(x)**2
     summ = np.sum(xsquare, axis=0)
@@ -119,7 +154,7 @@ def computations(A, MD, eVperhbar, t, L, h):
     maxxsquare = np.max(xsquare, axis=1)
     meanxsquares = np.mean(xsquare, axis=1)
     
-    # Initialize meanprob as complex to avoid warnings later
+    
     meanprob = np.zeros(MD, dtype=np.float64)
 
     for k in range(MD):
@@ -257,6 +292,8 @@ def computations(A, MD, eVperhbar, t, L, h):
         'eigenvector matrix': V,
         'x axis dipole moment': dmx,
         'y axis dipole moment': dmy,
-        'total weighted mean frequency': TWMF    
+        'total weighted mean frequency': TWMF,
+        'count': count,
+        'mesi thesi': mesithesi   
     }
 
