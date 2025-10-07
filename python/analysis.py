@@ -293,6 +293,7 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
         'x axis dipole moment': dmx,
         'y axis dipole moment': dmy,
         'total weighted mean frequency': TWMF,
+        'weighted mean frequency': WMF,
         'count': count,
         'mesi thesi': mesithesi   
     }

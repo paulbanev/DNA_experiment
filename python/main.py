@@ -46,8 +46,8 @@ def main():
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
     parser.add_argument('--sequence', type=str, required=True, help='One side of your polymer sequence')
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
-    parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric',
-                        help='Hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
+    parser.add_argument('--model', choices=['WIRE','FISHBONE','LADDER', 'EXTENDED_LADDER', 'SPECIALE'], required=True, help='transoport model to use')
+    parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric', help='Hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
     parser.add_argument('--disorder', type=int, default=0, help='Disorder type (0–10)')
     parser.add_argument('--seed', type=int, default=None, help='Random seed for disorder')
     parser.add_argument('--export', action='store_true', help='Export results to Excel')
@@ -55,7 +55,7 @@ def main():
 
     args = parser.parse_args()
 
-    num_runs = 10 if args.disorder != 0 else 1
+    num_runs = 200 if args.disorder != 0 else 1
 
     results = {
         "idiotimes": [],
@@ -66,7 +66,8 @@ def main():
         "total weighted mean frequency": [],
         "x axis dipole moment": [],
         "y axis dipole moment": [],
-        "mesi thesi": [],
+        #"mesi thesi": [],
+        "weighted mean frequency":[],
         "count": []
     }
 
@@ -75,8 +76,8 @@ def main():
 
         disorder_params = get_disorder_model(args.disorder, seed=seed)
         validated_seq = validate_sequence(args.sequence)
-        Ebp, tbb = sequence_properties(validated_seq, args.mode)
-        A, MD = matrixes(Ebp, tbb, disorder_params, validated_seq, mode=args.mode, seed=seed, symmetry=args.symmetry)
+        Ebp, tbb = sequence_properties(validated_seq, args.mode, args.model)
+        A, MD = matrixes(Ebp, tbb, disorder_params, validated_seq, mode=args.mode, model=args.model, seed=seed, symmetry=args.symmetry)
 
         metrics = run_simulation_once(args.number_of_DOS_points, A, MD, eVperhbar, t, L, h)
 

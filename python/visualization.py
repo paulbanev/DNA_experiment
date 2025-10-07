@@ -89,12 +89,12 @@ def save_plots(results, output_dir="results"):
     
         # --- Density of States (DOS) calculation and plot ---
           # number of points for DOS bins; you can change this or make it input if you want
-        fig, ax = plt.subplots()
-        ax.fill_between(mesithesi, count)
-        ax.set_ylabel('DOS (a.u.)')
-        ax.set_xlabel('Energy (eV)')
-        ax.set_title("Density of States (DOS)")
-        ax.grid(True)
-        fig.tight_layout()
-        fig.savefig(os.path.join(output_dir, "density_of_states.png"))
-        plt.close(fig)
+       # fig, ax = plt.subplots()
+        #ax.fill_between(mesithesi, count)
+        #ax.set_ylabel('DOS (a.u.)')
+        #ax.set_xlabel('Energy (eV)')
+        #ax.set_title("Density of States (DOS)")
+        #ax.grid(True)
+        #fig.tight_layout()
+        #fig.savefig(os.path.join(output_dir, "density_of_states.png"))
+        #plt.close(fig)
