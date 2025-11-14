@@ -6,27 +6,29 @@ from Bio.Seq import Seq
 def sequence_properties(sequence: str, mode: str, model: str):
     """Given a DNA sequence and mode (HOMO/LUMO), return Ebp and tbb arrays."""
     if model in("FISHBONE", "WIRE"): 
-        # Onsite energies (base pair)
-        if mode == "HOMO":
+         # here we need to input the Eb on a singular base level, aswell as the hopping integrals both the vertical and horisontal.
+       # we must not forget the diagonal hopping integrals. We'll read them here and then if needed nullify in matrixes.py 
+        if mode == "HOMO":#HOMO DATA BY MLS
             base_energy = {
-                "A": 8.3,
-                "T": 8.3,
-                "G": 8.0,
-                "C": 8.0,
+                "A": 8.49,
+                "T": 8.49,
+                "G": 8.3,
+                "C": 8.3,
                 "M": 8.43    #m represents A-C missmatch on the bp level
             }
             coupling_data = {               #the interaction parameters between basepairs. 5'3' direction
-                "AA": 0.02,  "TT": 0.02,
-                "AT": -0.035, "TA": -0.05,
-                "AG": 0.03,  "GA": 0.11,
-                "AC": -0.01, "CA": 0.01,
-                "TG": 0.01,  "GT": -0.01,
-                "CT": 0.03,  "TC": 0.11,
-                "GG": 0.1,   "CC": 0.1,
-                "GC": -0.01, "CG": 0.05,
+                "AA": 0.038,  "TT": 0.038,
+                "AT": -0.0050, "TA": -0.037,
+                "AG": 0.037,  "GA": 0.142,
+                "AC": -0.016, "CA": 0.028,
+                "TG": 0.028,  "GT": -0.016,
+                "CT": 0.037,  "TC": 0.142,
+                "GG": 0.116,   "CC": 0.116,
+                "GC": -0.01, "CG": 0.075,
                 "GM": 0.13, "MG": 0.031,      #mG represents connection Am-G,and Gm represents G-Am on 5'-3' direction
                 "MM": 0.036                   #mm represents connection Am-Am on 5'-3' diection
             }
+      
         elif mode == "LUMO":
             base_energy = {
                 "A": -4.9,

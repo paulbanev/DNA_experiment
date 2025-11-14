@@ -272,11 +272,14 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
     # Step 5: Total Weighted Mean Frequency
     FCamp[:, 0] = 0  # Clear DC component
     WMF = np.zeros(MD)
+    PWMF=np.zeros(V.shape[1])
     TWMF = 0.0
     for i in range(MD):
         if np.sum(FCamp[i, :]) != 0:
             WMF[i] = np.sum(uniquefreqs * FCamp[i, :]) / np.sum(FCamp[i, :])
-        TWMF += WMF[i] * meanprob[i]
+        PWMF[i]= WMF[i]*meanprob[i]
+        TWMF += PWMF[i]
+        
     TWMF_per_MD = TWMF / MD
 
    
@@ -294,7 +297,8 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
         'y axis dipole moment': dmy,
         'total weighted mean frequency': TWMF,
         'weighted mean frequency': WMF,
-        'count': count,
-        'mesi thesi': mesithesi   
+        'PWMF': PWMF,
+        'mesi thesi': mesithesi,
+        'count': count   
     }
 

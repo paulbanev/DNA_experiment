@@ -8,6 +8,7 @@ from visualization import save_plots
 
 L = 64 * 16385
 t = np.linspace(0, 100000, L)
+NN = 1000
 
 h = 4.135667517  # eV·fs
 hbar = h / (2 * np.pi)
@@ -55,7 +56,7 @@ def main():
 
     args = parser.parse_args()
 
-    num_runs = 200 if args.disorder != 0 else 1
+    num_runs = 10 if args.disorder != 0 else 1
 
     results = {
         "idiotimes": [],
@@ -66,9 +67,10 @@ def main():
         "total weighted mean frequency": [],
         "x axis dipole moment": [],
         "y axis dipole moment": [],
-        #"mesi thesi": [],
+        "mesi thesi": [],
         "weighted mean frequency":[],
-        "count": []
+        "PWMF": [],
+        "count":[]    
     }
 
     for run in range(num_runs):

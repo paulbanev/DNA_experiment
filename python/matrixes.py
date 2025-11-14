@@ -62,4 +62,6 @@ def matrixes(Ebp, tbb, disorder_params, sequence, model, mode, seed=None,  symme
         apapa=2 #delete this
         #modyfied code for the polymer we disccused with simse
     else:   raise ValueError("NOT VALID MODEL")
+    print("hello bruv")
+    print(A)
     return A, MD
