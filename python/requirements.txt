@@ -2,5 +2,4 @@ numpy
 biopython
 matplotlib
 pandas
-os
-argparse
+openpyxl
