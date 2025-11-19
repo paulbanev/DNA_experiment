@@ -8,7 +8,7 @@ from visualization import save_plots
 
 L = 64 * 16385
 t = np.linspace(0, 100000, L)
-NN = 1000
+NN = 10
 
 h = 4.135667517  # eV·fs
 hbar = h / (2 * np.pi)

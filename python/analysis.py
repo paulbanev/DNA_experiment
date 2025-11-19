@@ -33,7 +33,7 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
 
     for k in range(MD):
         for j in range(k + 1, MD):
-            if np.abs(idio[k] - idio[j]) <= 1.0e-12:
+            if np.abs(idio_sorted[k] - idio_sorted[j]) <= 1.0e-12:
                 DegeneracyFLAG = 'T'
                 print(f"Degeneracy detected between indices k={k}, j={j}")
                 degenerate[k] = 1
@@ -112,41 +112,58 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
     for k in range(MD):
         x += c[k] * np.outer(V[:, k], np.exp(lambda_vals[k] * t))
 
-            # start of Density of States (DOS) calculation
+    # start of Density of States (DOS) calculation
     DOSFLAG = 'T'
     if DOSFLAG == 'T':
 
         thesi = np.zeros(NN)
 
-        if idio[0] < 0:
-            thesi[0] = 1.01 * idio[0]
-            thesi[-1] = 0.99 * idio[MD-1]
-            step = (thesi[-1] - thesi[0]) / (NN - 1)
-        elif idio[0] > 0:
-            thesi[0] = 0.99 * idio[0]
-            thesi[-1] = 1.01 * idio[MD-1]
-            step = (thesi[-1] - thesi[0]) / (NN - 1)
+        # Calculate energy range - FIXED
+        if idio_sorted[0] < 0:
+            thesi[0] = 1.01 * idio_sorted[0]
+            thesi[-1] = 0.99 * idio_sorted[-1]  # Use last element, not MD-1
+        elif idio_sorted[0] > 0:
+            thesi[0] = 0.99 * idio_sorted[0]
+            thesi[-1] = 1.01 * idio_sorted[-1]  # Use last element, not MD-1
+        else:
+            # Handle case where min eigenvalue is exactly 0
+            thesi[0] = 1.01 * idio_sorted[0]
+            thesi[-1] = 1.01 * idio_sorted[-1]
+
+        step = (thesi[-1] - thesi[0]) / (NN - 1)
 
         for j in range(NN):
             thesi[j] = thesi[0] + j * step
 
         count = np.zeros(NN-1)
 
+        # Count eigenvalues in each bin - FIXED
         for i in range(MD):
             for j in range(NN-1):
-                if (idio[i] > thesi[j]) and (idio[i] <= thesi[j+1]):
+                if (idio_sorted[i] > thesi[j]) and (idio_sorted[i] <= thesi[j+1]):
                     count[j] += 1
 
+        # Normalize DOS
         count = count / (MD * step)
 
+        # Calculate bin centers - FIXED
         mesithesi = np.zeros(NN-1)
-        if np.min(idio) > 0:
+        if np.min(idio_sorted) > 0:
             for j in range(NN-1):
                 mesithesi[j] = -(thesi[j+1] + thesi[j]) / 2
-        elif np.min(idio) < 0:
+        elif np.min(idio_sorted) < 0:
+            for j in range(NN-1):
+                mesithesi[j] = (thesi[j+1] + thesi[j]) / 2
+        else:
+            # Mixed positive and negative eigenvalues
             for j in range(NN-1):
                 mesithesi[j] = (thesi[j+1] + thesi[j]) / 2
 
+        print(f"DOS arrays: mesithesi size = {mesithesi.shape}, count size = {count.shape}")
+        print(f"Energy range: {thesi[0]:.6f} to {thesi[-1]:.6f} eV")
+        print(f"Eigenvalue range: {idio_sorted[0]:.6f} to {idio_sorted[-1]:.6f} eV")
+
+        
     # Compute square norms and sums
     xsquare = np.abs(x)**2
     summ = np.sum(xsquare, axis=0)
