@@ -12,7 +12,8 @@ Features:
 - Results visualization and download
 """
 
-from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, session, redirect, url_for
+from functools import wraps
 import os
 import json
 import uuid
@@ -24,8 +25,11 @@ import subprocess
 import sys
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dna-simulation-secret-key-change-in-production'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dna-simulation-secret-key-change-in-production')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
+
+# Authentication configuration
+ACCESS_PASSWORD = "sweppesportokal1!"
 
 # Simulation job storage (in-memory for now, could use Redis/DB for production)
 jobs = {}
@@ -35,6 +39,15 @@ jobs_lock = threading.Lock()
 BASE_DIR = Path(__file__).parent
 RESULTS_DIR = BASE_DIR.parent / 'results'
 PYTHON_EXECUTABLE = sys.executable
+
+def login_required(f):
+    """Decorator to protect routes with authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def run_simulation_background(job_id, params):
     """Run simulation in background thread"""
@@ -105,12 +118,36 @@ def run_simulation_background(job_id, params):
             jobs[job_id]['error'] = str(e)
             jobs[job_id]['completed_at'] = datetime.now().isoformat()
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    if session.get('authenticated'):
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        if password == ACCESS_PASSWORD:
+            session['authenticated'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Incorrect password. Please try again.')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout and clear session"""
+    session.clear()
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def index():
     """Main page with simulation form"""
     return render_template('index.html')
 
 @app.route('/api/simulate', methods=['POST'])
+@login_required
 def simulate():
     """Start a new simulation"""
     try:
@@ -157,6 +194,7 @@ def simulate():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/status/<job_id>')
+@login_required
 def status(job_id):
     """Get simulation status"""
     with jobs_lock:
@@ -168,6 +206,7 @@ def status(job_id):
     return jsonify(job)
 
 @app.route('/api/jobs')
+@login_required
 def list_jobs():
     """List all jobs"""
     with jobs_lock:
@@ -188,6 +227,7 @@ def list_jobs():
     return jsonify(job_list)
 
 @app.route('/api/download/<job_id>/<filename>')
+@login_required
 def download(job_id, filename):
     """Download result file"""
     with jobs_lock:
@@ -214,6 +254,7 @@ def download(job_id, filename):
         return jsonify({'error': 'File not found'}), 404
 
 @app.route('/results/<job_id>')
+@login_required
 def results(job_id):
     """Results page"""
     return render_template('results.html', job_id=job_id)
