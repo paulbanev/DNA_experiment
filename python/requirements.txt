@@ -2,3 +2,4 @@ numpy
 biopython
 matplotlib
 pandas
+openpyxl
