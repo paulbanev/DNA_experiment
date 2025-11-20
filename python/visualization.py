@@ -1,8 +1,57 @@
+"""Visualization and Plot Generation
+
+This module generates publication-quality plots for DNA transport simulation results.
+All plots are saved as PNG files in the results directory.
+
+Generated Plots:
+    - eigenvalue_spectrum.png: Energy levels of the system
+    - participation_ratio.png: Delocalization measure for each eigenstate
+    - mean_probability.png: Time-averaged charge distribution
+    - mean_transfer_rate.png: Transfer rates (log scale)
+    - density_of_states.png: DOS histogram
+"""
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-def save_plots(results, output_dir="results"):
+def save_plots(results, output_dir=None):
+    """Generate and save all visualization plots from simulation results.
+    
+    Creates publication-quality plots with error bars (for multi-run results)
+    and saves them to the specified output directory.
+    
+    Args:
+        results (dict): Dictionary of simulation results where keys are metric
+                       names and values are lists of results from multiple runs.
+                       Expected keys:
+                           - 'idiotimes': Eigenvalues
+                           - 'participation ratio': PR values
+                           - 'pithanotites': Mean probabilities
+                           - 'mean transfer rate': Transfer rates
+                           - 'mesi thesi': DOS bin centers
+                           - 'count': DOS counts
+        output_dir (str): Directory path for saving plots (created if needed).
+                         If None, uses root results folder.
+    
+    Generated Files:
+        - eigenvalue_spectrum.png
+        - participation_ratio.png
+        - mean_probability.png
+        - mean_transfer_rate.png (log scale)
+        - density_of_states.png
+    
+    Notes:
+        - Error bars show standard deviation across runs
+        - Transfer rate plot uses logarithmic y-axis
+        - Dipole moment plots are currently disabled (commented out)
+    """
+    # If no output_dir provided, use root results folder
+    if output_dir is None:
+        project_root = Path(__file__).parent.parent
+        output_dir = project_root / "results"
+    
     os.makedirs(output_dir, exist_ok=True)
 
     # Convert lists to arrays
@@ -15,13 +64,7 @@ def save_plots(results, output_dir="results"):
     mesithesi = np.array(results.get("mesi thesi", [])).ravel()
     count = np.array(results.get("count", [])).ravel()
 
-#print("mesithesi shape:", mesithesi.shape)
-#print("count shape:", count.shape)
-
-#if mesithesi.ndim != 1 or count.ndim != 1:
- #   raise ValueError(f"mesithesi and count must be 1-D. Got shapes {mesithesi.shape} and {count.shape}")
-
-
+    # Calculate statistics across runs
     pr_mean = np.mean(pr, axis=0)
     pr_err = np.std(pr, axis=0)
     mean_prob_mean = np.mean(mean_prob, axis=0)
@@ -80,22 +123,22 @@ def save_plots(results, output_dir="results"):
     plt.close(fig)
 
     # --- Dipole Moment (if available) ---
+    # Currently disabled - uncomment to enable dipole moment plotting
     #if dmx.size and dmy.size:
-       # dmx_mean = np.mean(dmx, axis=0)
-      #  dmy_mean = np.mean(dmy, axis=0)
-      #  fig, ax = plt.subplots()
-       # ax.plot(dmx_mean, label='dmx')
-      #  ax.plot(dmy_mean, label='dmy')
-      #  ax.set_title("Dipole Moment vs Time")
-      #  ax.set_xlabel("Time Index")
-      #  ax.set_ylabel("Dipole Moment [a.u.]")
-      #  ax.legend()
-      #  ax.grid(True)
-      #  fig.savefig(os.path.join(output_dir, "dipole_moment.png"))
-      #  plt.close(fig)
+    #    dmx_mean = np.mean(dmx, axis=0)
+    #    dmy_mean = np.mean(dmy, axis=0)
+    #    fig, ax = plt.subplots()
+    #    ax.plot(dmx_mean, label='dmx')
+    #    ax.plot(dmy_mean, label='dmy')
+    #    ax.set_title("Dipole Moment vs Time")
+    #    ax.set_xlabel("Time Index")
+    #    ax.set_ylabel("Dipole Moment [a.u.]")
+    #    ax.legend()
+    #    ax.grid(True)
+    #    fig.savefig(os.path.join(output_dir, "dipole_moment.png"))
+    #    plt.close(fig)
     
-        # --- Density of States (DOS) calculation and plot ---
-          # number of points for DOS bins; you can change this or make it input if you want
+    # --- Density of States (DOS) ---
     fig, ax = plt.subplots()
     ax.fill_between(mesithesi, count)
     ax.set_ylabel('DOS (a.u.)')

@@ -1,10 +1,55 @@
+"""Excel Export Functionality
+
+This module handles exporting simulation results to Excel format with
+multiple sheets for different metrics, including statistical summaries.
+
+Output Structure:
+    - Each metric gets its own sheet
+    - Columns: Run 0, Run 1, ..., Run N, Mean, Average Error
+    - Eigenvector matrix gets special handling (too large for normal format)
+"""
+
 import pandas as pd
 import os
 import numpy as np
+from pathlib import Path
 
 def export_to_excel(results):
-    os.makedirs("results", exist_ok=True)
-    writer = pd.ExcelWriter("results/results.xlsx", engine='openpyxl')
+    """Export simulation results to Excel file with statistical summary.
+    
+    Creates a multi-sheet Excel workbook where each metric has its own sheet
+    containing all runs plus mean and standard error.
+    
+    Args:
+        results (dict): Dictionary of simulation results where keys are metric
+                       names and values are lists of results from multiple runs
+    
+    Output File:
+        results/results.xlsx with sheets:
+            - One sheet per metric (truncated to 31 chars for Excel limit)
+            - Each sheet has columns: Run 0, Run 1, ..., Mean, Average error
+            - Rows correspond to elements (sites, eigenstates, etc.)
+    
+    Excluded Metrics:
+        - 'eigenvector matrix' (too large, would be unreadable)
+        - 'x axis dipole moment' (time series, too large)
+        - 'y axis dipole moment' (time series, too large)
+    
+    Statistical Calculations:
+        - Mean: Average across all runs for each element
+        - Average error: Standard error = std / sqrt(n_runs)
+    
+    Notes:
+        - Creates 'results/' directory if it doesn't exist
+        - Uses openpyxl engine for .xlsx format
+        - Sheet names are limited to 31 characters by Excel
+    """
+    # Get the project root directory (parent of python folder)
+    project_root = Path(__file__).parent.parent
+    results_dir = project_root / "results"
+    
+    os.makedirs(results_dir, exist_ok=True)
+    writer = pd.ExcelWriter(results_dir / "results.xlsx", engine='openpyxl')
 
     exclude_keys = {"eigenvector matrix", "x axis dipole moment", "y axis dipole moment"}
 
@@ -26,8 +71,14 @@ def export_to_excel(results):
             data_array = pd.DataFrame(data)
             mean = data_array.mean()
             n = data_array.shape[0]
-            std = data_array.std()
-            sem = std / np.sqrt(n)
+            
+            # Handle single run case (n=1) to avoid NaN in standard error
+            if n == 1:
+                std = pd.Series(0, index=mean.index)
+                sem = pd.Series(0, index=mean.index)
+            else:
+                std = data_array.std()
+                sem = std / np.sqrt(n)
 
             combined = data_array.T
             combined.columns = [f"Run {i}" for i in range(data_array.shape[0])]

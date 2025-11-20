@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Results - DNA Transport</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 Simulation Results</h1>
+            <a href="/" class="btn btn-secondary">← Back to Home</a>
+        </header>
+
+        <div class="main-content">
+            <div id="resultContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading results...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jobId = '{{ job_id }}';
+
+        async function loadResults() {
+            try {
+                const response = await fetch(`/api/status/${jobId}`);
+                const job = await response.json();
+
+                const container = document.getElementById('resultContainer');
+
+                if (job.status === 'running' || job.status === 'queued') {
+                    // Still running - check again soon
+                    setTimeout(loadResults, 2000);
+                    container.innerHTML = `
+                        <div class="card">
+                            <h2>⏳ ${job.status === 'queued' ? 'Queued' : 'Running'}...</h2>
+                            <p>Simulation is ${job.status}. Please wait.</p>
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    `;
+                } else if (job.status === 'completed') {
+                    // Show results
+                    container.innerHTML = `
+                        <div class="card success">
+                            <h2>✅ Simulation Completed</h2>
+                            <p>Finished at: ${new Date(job.completed_at).toLocaleString()}</p>
+                        </div>
+
+                        <div class="card">
+                            <h3>Parameters</h3>
+                            <div class="params-grid">
+                                <div><strong>Sequence:</strong> ${job.params.sequence}</div>
+                                <div><strong>Mode:</strong> ${job.params.mode}</div>
+                                <div><strong>Model:</strong> ${job.params.model}</div>
+                                <div><strong>Symmetry:</strong> ${job.params.symmetry}</div>
+                                <div><strong>Disorder:</strong> ${job.params.disorder}</div>
+                                <div><strong>Workers:</strong> ${job.params.workers || 'Auto'}</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>📊 Results</h3>
+                            <div class="file-downloads">
+                                ${job.files.excel ? `
+                                    <a href="/api/download/${jobId}/results.xlsx" class="btn btn-primary" download>
+                                        📥 Download Excel Results
+                                    </a>
+                                ` : ''}
+                                ${job.files.eigenvalue_plot ? `
+                                    <a href="/api/download/${jobId}/eigenvalue_spectrum.png" class="btn btn-secondary" download>
+                                        📈 Download Eigenvalue Plot
+                                    </a>
+                                ` : ''}
+                                ${job.files.dos_plot ? `
+                                    <a href="/api/download/${jobId}/density_of_states.png" class="btn btn-secondary" download>
+                                        📊 Download DOS Plot
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        ${job.files.eigenvalue_plot ? `
+                            <div class="card">
+                                <h3>Eigenvalue Spectrum</h3>
+                                <img src="/api/download/${jobId}/eigenvalue_spectrum.png" 
+                                     alt="Eigenvalue Spectrum" class="result-image">
+                            </div>
+                        ` : ''}
+
+                        ${job.files.dos_plot ? `
+                            <div class="card">
+                                <h3>Density of States</h3>
+                                <img src="/api/download/${jobId}/density_of_states.png" 
+                                     alt="Density of States" class="result-image">
+                            </div>
+                        ` : ''}
+
+                        <details class="card">
+                            <summary><h3>📋 Console Output</h3></summary>
+                            <pre class="console-output">${job.output || 'No output available'}</pre>
+                        </details>
+                    `;
+                } else if (job.status === 'failed') {
+                    // Show error
+                    container.innerHTML = `
+                        <div class="card error">
+                            <h2>❌ Simulation Failed</h2>
+                            <p>The simulation encountered an error.</p>
+                            <pre class="error-output">${job.error || 'Unknown error'}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+                document.getElementById('resultContainer').innerHTML = `
+                    <div class="card error">
+                        <h2>❌ Error Loading Results</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Start loading
+        loadResults();
+    </script>
+</body>
+
+</html>

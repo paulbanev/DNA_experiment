@@ -1,0 +1,59 @@
+# Docker ignore file for DNA simulation
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Results and data
+results/
+*.xlsx
+*.png
+*.pdf
+
+# Logs
+logs/
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Documentation (built into image)
+*.md
+!README.md
+
+# Test files
+test_*.py
+*_test.py
+check_*.py
+verify_*.py
+explain_*.py
+compare_*.py
+parallelization_analysis.py
+
+# Development Docker
+Dockerfile.dev
+docker-compose.dev.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak

@@ -1,8 +1,27 @@
-#utils.py
+"""Utility Functions
+
+Helper functions for data processing and output formatting.
+"""
 
 import numpy as np
 
 def print_summary_stats(results_dict):
+    """Print formatted summary statistics from simulation results.
+    
+    For single-run results, prints individual element values.
+    For multi-run results, prints mean ± standard deviation.
+    
+    Args:
+        results_dict (dict): Dictionary where keys are metric names and
+                            values are arrays/lists of results
+    
+    Output Format:
+        Single run: "Element i: value"
+        Multiple runs: "Element i: mean ± std"
+    
+    Note:
+        Complex values are automatically converted to real parts.
+    """
     print("=== AVERAGE RESULTS ===")
     for key, values in results_dict.items():
         arr = np.real(np.array(values))  # convert complex to real

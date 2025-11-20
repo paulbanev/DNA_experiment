@@ -1,10 +1,48 @@
-# sequence.py
+"""DNA Sequence Processing and Physical Parameter Extraction
+
+This module handles DNA sequence validation and extracts physical parameters
+(onsite energies and hopping integrals) based on the electronic mode (HOMO/LUMO)
+and transport model (WIRE, FISHBONE, LADDER, etc.).
+
+The energy values and hopping integrals are derived from literature sources,
+primarily Marcus-like studies (MLS) for HOMO and various experimental/theoretical
+work for LUMO.
+"""
+
 
 import re
 from Bio.Seq import Seq
 
 def sequence_properties(sequence: str, mode: str, model: str):
-    """Given a DNA sequence and mode (HOMO/LUMO), return Ebp and tbb arrays."""
+    """Extract physical parameters from DNA sequence.
+    
+    Maps each base to its onsite energy and each adjacent base pair to their
+    hopping integral based on the specified electronic mode and transport model.
+    
+    Args:
+        sequence (str): DNA sequence (one strand) using characters A, C, G, T, M
+                       where M represents an A-C mismatch
+        mode (str): Electronic mode - either 'HOMO' (hole transport) or
+                   'LUMO' (electron transport)
+        model (str): Transport model - 'WIRE', 'FISHBONE', 'LADDER',
+                    'EXTENDED_LADDER', or 'SPECIALE'
+    
+    Returns:
+        tuple: (Ebp, tbb) where:
+            - Ebp (list): Onsite energies in eV for each base in sequence
+            - tbb (list): Hopping integrals in eV between adjacent bases
+                         (length = len(sequence) - 1)
+    
+    Raises:
+        ValueError: If mode is not 'HOMO' or 'LUMO'
+        ValueError: If model is not recognized
+        ValueError: If invalid base pair combination found
+    
+    Notes:
+        - Energy values differ between WIRE/FISHBONE and LADDER models
+        - Hopping integrals are directional (5'→3' convention)
+        - LUMO transport ignores sugar backbones (ES = 0, tS = 0)
+    """
     if model in("FISHBONE", "WIRE"): 
          # here we need to input the Eb on a singular base level, aswell as the hopping integrals both the vertical and horisontal.
        # we must not forget the diagonal hopping integrals. We'll read them here and then if needed nullify in matrixes.py 
@@ -187,16 +225,47 @@ def sequence_properties(sequence: str, mode: str, model: str):
 
 
 def validate_sequence(seq):
+    """Validate and normalize DNA sequence.
+    
+    Args:
+        seq (str): Input DNA sequence (case-insensitive)
+    
+    Returns:
+        str: Uppercase validated sequence
+    
+    Raises:
+        ValueError: If sequence contains characters other than A, C, G, T, M
+    """
     seq = seq.upper()
     if not re.fullmatch(r'[ACGTM]+', seq):
         raise ValueError("Invalid sequence: only A, C, G, T, M characters are allowed.")
     return seq
 
 def get_reverse_complement(seq):
+    """Get reverse complement of DNA sequence using BioPython.
+    
+    Args:
+        seq (str): DNA sequence
+    
+    Returns:
+        str: Reverse complement sequence (A↔T, G↔C, reversed)
+    """
     return str(Seq(seq).reverse_complement())
 
 def get_sequence_profile(seq):
-    """Optional: return frequency or position info, etc."""
+    """Get basic statistics about DNA sequence composition.
+    
+    Args:
+        seq (str): DNA sequence
+    
+    Returns:
+        dict: Dictionary containing:
+            - 'length': Total sequence length
+            - 'A': Count of adenine bases
+            - 'C': Count of cytosine bases
+            - 'G': Count of guanine bases
+            - 'T': Count of thymine bases
+    """
     return {
         'length': len(seq),
         'A': seq.count('A'),
