@@ -19,10 +19,19 @@ import json
 import uuid
 import time
 import threading
+import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 import subprocess
-import sys
+
+# Configure logging to stdout for Docker/Portainer visibility
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dna-simulation-secret-key-change-in-production')
