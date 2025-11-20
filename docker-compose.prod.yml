@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  dna-simulation:
+    image: pavlosbanev/dna_experiment:latest
+    container_name: dna-simulation-web
+    expose:
+      - "5000"
+    environment:
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount results directory to persist data
+      - dna_results:/app/results
+      # Mount logs directory
+      - dna_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/', timeout=5)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Resource limits (adjust based on your server)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    networks:
+      - dna_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: dna-simulation-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Uncomment the line below if you have SSL certificates
+      # - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      dna-simulation:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - dna_network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  dna_network:
+    driver: bridge
+
+volumes:
+  dna_results:
+    driver: local
+  dna_logs:
+    driver: local
