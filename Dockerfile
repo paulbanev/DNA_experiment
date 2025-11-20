@@ -37,4 +37,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:5000/', timeout=5)" || exit 1
 
 # Run with Gunicorn - Log to stdout/stderr for Docker/Portainer visibility
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "300", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "info", "web_app:app"]
+# Using 1 worker because job state is stored in-memory (not shared between workers)
+# For production with multiple workers, use Redis or database for job storage
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "300", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "info", "web_app:app"]
