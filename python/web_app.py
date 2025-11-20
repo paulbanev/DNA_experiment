@@ -137,8 +137,10 @@ def login():
         password = request.form.get('password', '')
         if password == ACCESS_PASSWORD:
             session['authenticated'] = True
+            logger.info("Successful login")
             return redirect(url_for('index'))
         else:
+            logger.warning(f"Failed login attempt from IP: {request.remote_addr}")
             return render_template('login.html', error='Incorrect password. Please try again.')
     
     return render_template('login.html')
@@ -161,11 +163,13 @@ def simulate():
     """Start a new simulation"""
     try:
         data = request.get_json()
+        logger.info(f"New simulation request: sequence={data.get('sequence')}, mode={data.get('mode')}, model={data.get('model')}")
         
         # Validate required fields
         required = ['sequence', 'mode', 'model']
         for field in required:
             if field not in data:
+                logger.error(f"Missing required field: {field}")
                 return jsonify({'error': f'Missing required field: {field}'}), 400
         
         # Create job
@@ -193,6 +197,8 @@ def simulate():
         thread.daemon = True
         thread.start()
         
+        logger.info(f"Started simulation job: {job_id}")
+        
         return jsonify({
             'job_id': job_id,
             'status': 'queued',
@@ -200,6 +206,7 @@ def simulate():
         })
     
     except Exception as e:
+        logger.error(f"Error starting simulation: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/status/<job_id>')
