@@ -13,8 +13,11 @@ services:
     volumes:
       # Mount results directory to persist data
       - dna_results:/app/results
-      # Mount logs directory
-      - dna_logs:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/', timeout=5)" ]
@@ -24,6 +27,4 @@ services:
       start_period: 10s
 volumes:
   dna_results:
-    driver: local
-  dna_logs:
     driver: local
