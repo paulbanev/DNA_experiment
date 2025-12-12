@@ -1,0 +1,28 @@
+data_benzene
+_chemical_name_common 'Benzene'
+_cell_length_a    7.39
+_cell_length_b    9.42
+_cell_length_c    6.81
+_cell_angle_alpha 90.00
+_cell_angle_beta  90.00
+_cell_angle_gamma 90.00
+_symmetry_space_group_name_H-M 'P 21/c'
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+C1 C 0.1234 0.2345 0.3456
+C2 C 0.2345 0.3456 0.4567
+C3 C 0.3456 0.4567 0.5678
+C4 C 0.4567 0.5678 0.6789
+C5 C 0.5678 0.6789 0.7890
+C6 C 0.6789 0.7890 0.8901
+H1 H 0.1111 0.2222 0.3333
+H2 H 0.2222 0.3333 0.4444
+H3 H 0.3333 0.4444 0.5555
+H4 H 0.4444 0.5555 0.6666
+H5 H 0.5555 0.6666 0.7777
+H6 H 0.6666 0.7777 0.8888

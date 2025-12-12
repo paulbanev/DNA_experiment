@@ -4,6 +4,7 @@ from matrixes import matrixes
 from disorder import get_disorder_model
 from analysis import computations
 from sequence import sequence_properties, validate_sequence
+from structure_reader import structure_properties
 from visualization import save_plots
 
 L = 64 * 16385
@@ -45,7 +46,12 @@ def print_summary_stats(results):
 
 def main():
     parser = argparse.ArgumentParser(description="Run Fishbone DNA Transport Simulation")
-    parser.add_argument('--sequence', type=str, required=True, help='One side of your polymer sequence')
+    
+    # Create mutually exclusive group for sequence vs structure input
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument('--sequence', type=str, help='DNA sequence (e.g., AAAAA)')
+    input_group.add_argument('--structure', type=str, help='Path to structure file (CIF, XYZ, or PDB)')
+    
     parser.add_argument('--mode', choices=['HOMO', 'LUMO'], required=True, help='Electronic mode')
     parser.add_argument('--model', choices=['WIRE','FISHBONE','LADDER', 'EXTENDED_LADDER', 'SPECIALE'], required=True, help='transoport model to use')
     parser.add_argument('--symmetry', choices=['symmetric', 'asymmetric'], default='symmetric', help='Hopping symmetry: symmetric (tSp=tS) or asymmetric (tSp=0.16)')
@@ -53,6 +59,8 @@ def main():
     parser.add_argument('--seed', type=int, default=None, help='Random seed for disorder')
     parser.add_argument('--export', action='store_true', help='Export results to Excel')
     parser.add_argument('--number_of_DOS_points', type=int, default=10)
+    parser.add_argument('--chain-direction', choices=['x', 'y', 'z'], default='z', 
+                        help='Primary chain direction for structure files (default: z)')
 
     args = parser.parse_args()
 
@@ -77,8 +85,17 @@ def main():
         seed = args.seed + run if args.seed is not None else run
 
         disorder_params = get_disorder_model(args.disorder, seed=seed)
-        validated_seq = validate_sequence(args.sequence)
-        Ebp, tbb = sequence_properties(validated_seq, args.mode, args.model)
+        
+        # Get Ebp and tbb from either sequence or structure file
+        if args.sequence:
+            validated_seq = validate_sequence(args.sequence)
+            Ebp, tbb = sequence_properties(validated_seq, args.mode, args.model)
+        else:  # args.structure
+            print(f"Reading structure from: {args.structure}")
+            Ebp, tbb = structure_properties(args.structure, args.mode, args.chain_direction)
+            validated_seq = 'X' * len(Ebp)  # Placeholder sequence for structure-based input
+            print(f"Extracted {len(Ebp)} sites from structure file")
+        
         A, MD = matrixes(Ebp, tbb, disorder_params, validated_seq, mode=args.mode, model=args.model, seed=seed, symmetry=args.symmetry)
 
         metrics = run_simulation_once(args.number_of_DOS_points, A, MD, eVperhbar, t, L, h)
