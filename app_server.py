@@ -3,7 +3,7 @@ Simple Flask backend for DNA Transport Simulation
 Handles both sequence input and structure file uploads
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import subprocess
@@ -74,7 +74,10 @@ def simulate_sequence():
         
         # Extract plots from output
         plots = {}
+        excel_file = None
         output = result.stdout
+        
+        # Extract plots JSON
         if '<<<PLOTS_JSON_START>>>' in output and '<<<PLOTS_JSON_END>>>' in output:
             try:
                 import json
@@ -90,12 +93,27 @@ def simulate_sequence():
             except Exception as e:
                 print(f"Error extracting plots: {e}")
         
+        # Extract Excel filename
+        if '<<<EXCEL_FILE>>>' in output and '<<<EXCEL_FILE_END>>>' in output:
+            try:
+                start_marker = '<<<EXCEL_FILE>>>'
+                end_marker = '<<<EXCEL_FILE_END>>>'
+                start_idx = output.find(start_marker) + len(start_marker)
+                end_idx = output.find(end_marker)
+                excel_file = output[start_idx:end_idx].strip()
+                # Remove Excel marker from output display
+                output = output[:output.find(start_marker)] + output[end_idx + len(end_marker):]
+                output = output.strip()
+            except Exception as e:
+                print(f"Error extracting Excel file: {e}")
+        
         return jsonify({
             'success': result.returncode == 0,
             'output': output,
             'error': result.stderr,
             'command': ' '.join(cmd),
-            'plots': plots  # Include plots in response
+            'plots': plots,  # Include plots in response
+            'excel_file': excel_file  # Include Excel file path if generated
         })
         
     except subprocess.TimeoutExpired:
@@ -108,11 +126,11 @@ def simulate_sequence():
 def simulate_structure():
     """Handle structure file simulation"""
     try:
-        # Get form data
-        if 'file' not in request.files:
+        # Get form data - HTML form uses name="structure"
+        if 'structure' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
         
-        file = request.files['file']
+        file = request.files['structure']
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
         
@@ -174,7 +192,10 @@ def simulate_structure():
             
             # Extract plots from output
             plots = {}
+            excel_file = None
             output = result.stdout
+            
+            # Extract plots JSON
             if '<<<PLOTS_JSON_START>>>' in output and '<<<PLOTS_JSON_END>>>' in output:
                 try:
                     import json
@@ -190,13 +211,28 @@ def simulate_structure():
                 except Exception as e:
                     print(f"Error extracting plots: {e}")
             
+            # Extract Excel filename
+            if '<<<EXCEL_FILE>>>' in output and '<<<EXCEL_FILE_END>>>' in output:
+                try:
+                    start_marker = '<<<EXCEL_FILE>>>'
+                    end_marker = '<<<EXCEL_FILE_END>>>'
+                    start_idx = output.find(start_marker) + len(start_marker)
+                    end_idx = output.find(end_marker)
+                    excel_file = output[start_idx:end_idx].strip()
+                    # Remove Excel marker from output display
+                    output = output[:output.find(start_marker)] + output[end_idx + len(end_marker):]
+                    output = output.strip()
+                except Exception as e:
+                    print(f"Error extracting Excel file: {e}")
+            
             return jsonify({
                 'success': result.returncode == 0,
                 'output': output,
                 'error': result.stderr,
                 'command': ' '.join(cmd),
                 'filename': file.filename,
-                'plots': plots  # Include plots in response
+                'plots': plots,  # Include plots in response
+                'excel_file': excel_file  # Include Excel file path if generated
             })
             
         finally:
@@ -229,6 +265,21 @@ def list_examples():
                 })
         
         return jsonify({'examples': examples})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/download/excel/<path:filename>', methods=['GET'])
+def download_excel(filename):
+    """Serve Excel files for download"""
+    try:
+        file_path = PYTHON_DIR / filename
+        if not file_path.exists():
+            return jsonify({'error': 'File not found'}), 404
+        
+        return send_file(file_path, as_attachment=True, 
+                        download_name='simulation_results.xlsx',
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

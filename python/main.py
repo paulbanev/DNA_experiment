@@ -135,8 +135,10 @@ def main():
 
     if args.export:
         from export_results import export_to_excel
-        export_to_excel(results)
-        print("Results exported to Excel.")
+        excel_file = export_to_excel(results)
+        print(f"Results exported to Excel: {excel_file}")
+        # Output Excel filename so backend can provide download
+        print(f"\n<<<EXCEL_FILE>>>{excel_file}<<<EXCEL_FILE_END>>>")
 
     save_plots(results)
     

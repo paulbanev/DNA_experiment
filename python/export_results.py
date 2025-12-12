@@ -4,7 +4,8 @@ import numpy as np
 
 def export_to_excel(results):
     os.makedirs("results", exist_ok=True)
-    writer = pd.ExcelWriter("results/results.xlsx", engine='openpyxl')
+    filename = "results/results.xlsx"
+    writer = pd.ExcelWriter(filename, engine='openpyxl')
 
     exclude_keys = {"eigenvector matrix", "x axis dipole moment", "y axis dipole moment"}
 
@@ -38,3 +39,5 @@ def export_to_excel(results):
             combined.to_excel(writer, sheet_name=metric_name[:31])
 
     writer.close()
+    return filename  # Return filename for download
+

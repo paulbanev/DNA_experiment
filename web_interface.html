@@ -844,6 +844,34 @@
                     if (result.plots) {
                         displayPlots(result.plots, 'sequence-plots');
                     }
+
+                    // Display Excel download button if available
+                    if (result.excel_file) {
+                        const downloadSection = document.createElement('div');
+                        downloadSection.id = 'sequence-excel-download';
+                        downloadSection.style.cssText = `
+                            margin-top: 20px;
+                            padding: 15px;
+                            background: #f0f4ff;
+                            border-radius: 8px;
+                            border-left: 4px solid #667eea;
+                            text-align: center;
+                        `;
+                        downloadSection.innerHTML = `
+                            <h4 style="margin: 0 0 10px 0; color: #667eea;">📊 Excel Export Ready</h4>
+                            <button onclick="window.location.href='${API_URL}/download/excel/${result.excel_file}'" 
+                                    style="background: #667eea; color: white; border: none; padding: 10px 30px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                                📥 Download Results.xlsx
+                            </button>
+                        `;
+
+                        // Remove old download section if exists
+                        const oldDownload = document.getElementById('sequence-excel-download');
+                        if (oldDownload) oldDownload.remove();
+
+                        // Add download section after output
+                        document.getElementById('sequence-output').after(downloadSection);
+                    }
                 } else {
                     // Show error
                     document.getElementById('sequence-output').textContent =
@@ -896,6 +924,34 @@
                     // Display plots if available
                     if (result.plots) {
                         displayPlots(result.plots, 'structure-plots');
+                    }
+
+                    // Display Excel download button if available
+                    if (result.excel_file) {
+                        const downloadSection = document.createElement('div');
+                        downloadSection.id = 'structure-excel-download';
+                        downloadSection.style.cssText = `
+                            margin-top: 20px;
+                            padding: 15px;
+                            background: #f0f4ff;
+                            border-radius: 8px;
+                            border-left: 4px solid #667eea;
+                            text-align: center;
+                        `;
+                        downloadSection.innerHTML = `
+                            <h4 style="margin: 0 0 10px 0; color: #667eea;">📊 Excel Export Ready</h4>
+                            <button onclick="window.location.href='${API_URL}/download/excel/${result.excel_file}'" 
+                                    style="background: #667eea; color: white; border: none; padding: 10px 30px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                                📥 Download Results.xlsx
+                            </button>
+                        `;
+
+                        // Remove old download section if exists
+                        const oldDownload = document.getElementById('structure-excel-download');
+                        if (oldDownload) oldDownload.remove();
+
+                        // Add download section after output
+                        document.getElementById('structure-output').after(downloadSection);
                     }
                 } else {
                     // Show error
