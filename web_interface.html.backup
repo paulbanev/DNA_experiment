@@ -366,24 +366,7 @@
 
                 <div class="form-group">
                     <label for="dos-seq">Number of DOS Points</label>
-                    <input type="number" id="dos-seq" name="dos" value="5" min="1" max="1000" required>
-                    <div class="help-text">Higher values = more detailed density of states (slower)</div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="seed-seq">Random Seed (optional)</label>
-                        <input type="number" id="seed-seq" name="seed" placeholder="Leave empty for random">
-                        <div class="help-text">For reproducible disorder results</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; cursor: pointer; margin-top: 30px;">
-                            <input type="checkbox" id="export-seq" name="export"
-                                style="margin-right: 10px; width: auto;">
-                            <span>Export results to Excel</span>
-                        </label>
-                    </div>
+                    <input type="text" id="dos-seq" name="dos" value="5" required>
                 </div>
 
                 <div class="examples">
@@ -483,24 +466,7 @@
 
                     <div class="form-group">
                         <label for="dos-struct">Number of DOS Points</label>
-                        <input type="number" id="dos-struct" name="dos" value="5" min="1" max="1000" required>
-                        <div class="help-text">Higher values = more detailed density of states (slower)</div>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="seed-struct">Random Seed (optional)</label>
-                        <input type="number" id="seed-struct" name="seed" placeholder="Leave empty for random">
-                        <div class="help-text">For reproducible disorder results</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; cursor: pointer; margin-top: 30px;">
-                            <input type="checkbox" id="export-struct" name="export"
-                                style="margin-right: 10px; width: auto;">
-                            <span>Export results to Excel</span>
-                        </label>
+                        <input type="text" id="dos-struct" name="dos" value="5" required>
                     </div>
                 </div>
 
@@ -546,103 +512,37 @@
             }
         });
 
-        const API_URL = 'http://localhost:5001/api';
-
-        // Check backend connectivity on load
-        window.addEventListener('load', async () => {
-            try {
-                const response = await fetch(`${API_URL}/health`);
-                if (response.ok) {
-                    console.log('✓ Backend connected');
-                }
-            } catch (error) {
-                console.warn('⚠ Backend not running. Start with: docker-compose up -d');
-            }
-        });
-
-        // Tab switching
-        function switchTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.closest('.tab').classList.add('active');
-
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(tabName + '-tab').classList.add('active');
-        }
-
-        // File upload handling
-        document.getElementById('structure-file').addEventListener('change', function (e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                document.getElementById('file-name').textContent = '✓ ' + fileName;
-            }
-        });
-
         // Sequence form submission
         document.getElementById('sequence-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const formData = new FormData(e.target);
-            const data = {
-                sequence: formData.get('sequence'),
-                mode: formData.get('mode'),
-                model: formData.get('model'),
-                symmetry: formData.get('symmetry'),
-                disorder: formData.get('disorder'),
-                dos: formData.get('dos')
-            };
-
-            // Add seed if provided
-            if (formData.get('seed')) {
-                data.seed = formData.get('seed');
-            }
-
-            // Add export if checked
-            if (formData.get('export')) {
-                data.export = 'true';
-            }
+            const sequence = formData.get('sequence');
+            const mode = formData.get('mode');
+            const model = formData.get('model');
+            const symmetry = formData.get('symmetry');
+            const disorder = formData.get('disorder');
+            const dos = formData.get('dos');
 
             // Show loading
             document.getElementById('sequence-loading').classList.add('show');
             document.getElementById('sequence-results').classList.remove('show');
 
             try {
-                const response = await fetch(`${API_URL}/simulate/sequence`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+                // Build command
+                const command = `python main.py --sequence ${sequence} --mode ${mode} --model ${model} --symmetry ${symmetry} --disorder ${disorder} --number_of_DOS_points ${dos}`;
 
-                const result = await response.json();
+                // Show command being run
+                document.getElementById('sequence-output').textContent = `Running command:\n${command}\n\nThis would execute the simulation...\n\n(Note: This is a static demo. Connect to backend for live results)`;
 
-                if (response.ok && result.success) {
-                    // Show successful results
-                    document.getElementById('sequence-output').textContent =
-                        `✓ Simulation completed successfully!\n\n` +
-                        `Command: ${result.command}\n\n` +
-                        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-                        result.output;
-                } else {
-                    // Show error
-                    document.getElementById('sequence-output').textContent =
-                        `✗ Simulation failed\n\n` +
-                        `Error: ${result.error || 'Unknown error'}\n\n` +
-                        (result.output ? `Output:\n${result.output}` : '');
-                }
+                // Simulate delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
+                // Show results
                 document.getElementById('sequence-loading').classList.remove('show');
                 document.getElementById('sequence-results').classList.add('show');
-
             } catch (error) {
-                document.getElementById('sequence-output').textContent =
-                    `✗ Failed to connect to backend server\n\n` +
-                    `Error: ${error.message}\n\n` +
-                    `Make sure the backend is running:\n` +
-                    `  docker-compose up -d\n\n` +
-                    `Backend should be at: ${API_URL}`;
+                document.getElementById('sequence-output').textContent = 'Error: ' + error.message;
                 document.getElementById('sequence-loading').classList.remove('show');
                 document.getElementById('sequence-results').classList.add('show');
             }
@@ -653,44 +553,33 @@
             e.preventDefault();
 
             const formData = new FormData(e.target);
+            const file = formData.get('structure');
+            const mode = formData.get('mode');
+            const model = formData.get('model');
+            const chainDir = formData.get('chain-direction');
+            const symmetry = formData.get('symmetry');
+            const disorder = formData.get('disorder');
+            const dos = formData.get('dos');
 
             // Show loading
             document.getElementById('structure-loading').classList.add('show');
             document.getElementById('structure-results').classList.remove('show');
 
             try {
-                const response = await fetch(`${API_URL}/simulate/structure`, {
-                    method: 'POST',
-                    body: formData  // Don't set Content-Type, browser will set it with boundary
-                });
+                // Build command
+                const command = `python main.py --structure ${file.name} --mode ${mode} --model ${model} --chain-direction ${chainDir} --symmetry ${symmetry} --disorder ${disorder} --number_of_DOS_points ${dos}`;
 
-                const result = await response.json();
+                // Show command being run
+                document.getElementById('structure-output').textContent = `Running command:\n${command}\n\nStructure file: ${file.name} (${file.size} bytes)\nFile type: ${file.name.split('.').pop().toUpperCase()}\n\nThis would execute the simulation...\n\n(Note: This is a static demo. Connect to backend for live results)`;
 
-                if (response.ok && result.success) {
-                    // Show successful results
-                    document.getElementById('structure-output').textContent =
-                        `✓ Structure simulation completed successfully!\n\n` +
-                        `Command: ${result.command}\n\n` +
-                        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-                        result.output;
-                } else {
-                    // Show error
-                    document.getElementById('structure-output').textContent =
-                        `✗ Structure simulation failed\n\n` +
-                        `Error: ${result.error || 'Unknown error'}\n\n` +
-                        (result.output ? `Output:\n${result.output}` : '');
-                }
+                // Simulate delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
+                // Show results
                 document.getElementById('structure-loading').classList.remove('show');
                 document.getElementById('structure-results').classList.add('show');
-
             } catch (error) {
-                document.getElementById('structure-output').textContent =
-                    `✗ Failed to connect to backend server\n\n` +
-                    `Error: ${error.message}\n\n` +
-                    `Make sure the backend is running:\n` +
-                    `  docker-compose up -d\n\n` +
-                    `Backend should be at: ${API_URL}`;
+                document.getElementById('structure-output').textContent = 'Error: ' + error.message;
                 document.getElementById('structure-loading').classList.remove('show');
                 document.getElementById('structure-results').classList.add('show');
             }
