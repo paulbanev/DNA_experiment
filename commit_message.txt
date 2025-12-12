@@ -1,0 +1,50 @@
+feat: Add structure file support (CIF/XYZ/PDB) and web interface
+
+Add comprehensive structure file reading capabilities and web-based interface
+for the DNA transport simulation application.
+
+New Features:
+- Structure File Reader (structure_reader.py): Parse CIF, XYZ, and PDB formats
+- Web Interface (web_interface.html): Beautiful drag-and-drop file upload UI
+- Flask Backend (app_server.py): REST API for running simulations
+- Example Files: Benzene (CIF), carbon chain (XYZ), DNA base pair (PDB)
+- Comprehensive Documentation: 6 detailed guides and examples
+
+Modified Files:
+- python/analysis.py: Fix Unicode encoding bug (λ character) for Windows
+- python/main.py: Add --structure and --chain-direction CLI options
+- README.md: Update with new structure file features
+- .gitignore: Add Python-specific ignore patterns
+
+Technical Details:
+- Distance-based tight-binding hopping model: t = t₀ × exp(-β(r - r₀))
+- Element-specific on-site energies (C, N, O, S)
+- Automatic format detection from file extension
+- Chain direction selection (x/y/z axis) for 1D transport
+- Fully backward compatible with DNA sequence input
+
+Web Interface Features:
+- Tab-based navigation (Sequence vs Structure input)
+- Real-time simulation execution via Flask API
+- File drag-and-drop with preview
+- Loading animations and error handling
+- Beautiful gradient design with smooth transitions
+
+API Endpoints:
+- POST /api/simulate/sequence - DNA sequence simulations
+- POST /api/simulate/structure - Structure file simulations
+- GET /api/examples - List available example files
+- GET /api/health - Backend health check
+
+Testing:
+- All three file formats tested and working (CIF, XYZ, PDB)
+- Backward compatibility verified with DNA sequences
+- Web interface functional with live simulation execution
+
+Documentation:
+- WEB_APP_GUIDE.md: Complete web app setup and usage
+- STRUCTURE_FILE_GUIDE.md: File format specifications
+- QUICK_START.md: Quick reference for both methods
+- CHANGES_SUMMARY.md: What changed overview
+- IMPLEMENTATION_SUMMARY.md: Technical implementation details
+- GIT_COMMIT_GUIDE.md: This commit guide
