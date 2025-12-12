@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Flask Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dna-simulation-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount python directory for development
+      - ./python:/app/python
+      # Mount results directory to persist plots
+      - ./python/results:/app/python/results
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    networks:
+      - dna-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/api/health" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: dna-simulation-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web_interface.html:/usr/share/nginx/html/index.html:ro
+      - ./python/example_benzene.cif:/usr/share/nginx/html/examples/example_benzene.cif:ro
+      - ./python/example_chain.xyz:/usr/share/nginx/html/examples/example_chain.xyz:ro
+      - ./python/example_dna.pdb:/usr/share/nginx/html/examples/example_dna.pdb:ro
+      # Uncomment for SSL
+      # - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+      # - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+    depends_on:
+      - backend
+    networks:
+      - dna-network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+networks:
+  dna-network:
+    driver: bridge
+
+volumes:
+  results:
+    driver: local

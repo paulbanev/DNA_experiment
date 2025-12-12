@@ -1,0 +1,53 @@
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (will be mounted as volume)
+python/results/*.png
+python/results/*.pdf
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Scripts
+fresh_server_setup.sh
+stage_changes.ps1
+commit_message.txt
+
+# Logs
+*.log
+
+# Backend/Frontend folders (Strapi/Quasar - not used in this deployment)
+backend/
+frontend/
