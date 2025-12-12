@@ -61,10 +61,37 @@ def main():
     parser.add_argument('--number_of_DOS_points', type=int, default=10)
     parser.add_argument('--chain-direction', choices=['x', 'y', 'z'], default='z', 
                         help='Primary chain direction for structure files (default: z)')
+    
+    # Advanced controls
+    parser.add_argument('--workers', type=int, default=None, 
+                        help='Number of parallel workers (default: auto based on disorder)')
+    parser.add_argument('--enable-dos', action='store_true', default=True,
+                        help='Enable DOS calculations (default: enabled)')
+    parser.add_argument('--disable-dos', dest='enable_dos', action='store_false',
+                        help='Disable DOS calculations')
+    parser.add_argument('--enable-fft', action='store_true', default=True,
+                        help='Enable FFT analysis (default: enabled)')
+    parser.add_argument('--disable-fft', dest='enable_fft', action='store_false',
+                        help='Disable FFT analysis')
+    parser.add_argument('--enable-analytical', action='store_true', default=True,
+                        help='Enable analytical calculations (default: enabled)')
+    parser.add_argument('--disable-analytical', dest='enable_analytical', action='store_false',
+                        help='Disable analytical calculations')
+    parser.add_argument('--enable-fourier', action='store_true', default=True,
+                        help='Enable Fourier analysis (default: enabled)')
+    parser.add_argument('--disable-fourier', dest='enable_fourier', action='store_false',
+                        help='Disable Fourier analysis')
+
 
     args = parser.parse_args()
 
-    num_runs = 10 if args.disorder != 0 else 1
+    # Determine number of parallel runs
+    if args.workers is not None:
+        num_runs = args.workers
+    else:
+        num_runs = 10 if args.disorder != 0 else 1
+    
+    print(f"Running {num_runs} simulation(s)...")
 
     results = {
         "idiotimes": [],

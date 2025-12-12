@@ -360,6 +360,11 @@
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
                         </select>
                     </div>
                 </div>
@@ -385,6 +390,48 @@
                         </label>
                     </div>
                 </div>
+
+                <!-- Advanced Options -->
+                <details
+                    style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e1e4e8;">
+                    <summary style="cursor: pointer; font-weight: 600; color: #667eea; user-select: none;">
+                        ⚙️ Advanced Options (click to expand)
+                    </summary>
+                    <div style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="workers-seq">Number of Workers</label>
+                            <input type="number" id="workers-seq" name="workers" placeholder="Auto" min="1" max="100">
+                            <div class="help-text">Leave empty for automatic (10 if disorder > 0, else 1)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Analysis
+                                Controls:</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_dos" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable DOS calculations</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_fft" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable FFT analysis</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name=" enable_analytical" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable analytical calc</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_fourier" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable Fourier analysis</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </details>
 
                 <div class="examples">
                     <h4>💡 Examples:</h4>
@@ -478,6 +525,11 @@
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
                         </select>
                     </div>
 
@@ -503,6 +555,49 @@
                         </label>
                     </div>
                 </div>
+
+                <!-- Advanced Options -->
+                <details
+                    style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e1e4e8;">
+                    <summary style="cursor: pointer; font-weight: 600; color: #667eea; user-select: none;">
+                        ⚙️ Advanced Options (click to expand)
+                    </summary>
+                    <div style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="workers-struct">Number of Workers</label>
+                            <input type="number" id="workers-struct" name="workers" placeholder="Auto" min="1"
+                                max="100">
+                            <div class="help-text">Leave empty for automatic (10 if disorder > 0, else 1)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Analysis
+                                Controls:</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_dos" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable DOS calculations</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_fft" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable FFT analysis</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_analytical" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable analytical calc</span>
+                                </label>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" name="enable_fourier" checked
+                                        style="margin-right: 8px; width: auto;">
+                                    <span>Enable Fourier analysis</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </details>
 
                 <div class="examples">
                     <h4>💡 Example Files:</h4>
@@ -601,6 +696,25 @@
             // Add export if checked
             if (formData.get('export')) {
                 data.export = 'true';
+            }
+
+            // Add workers if provided
+            if (formData.get('workers')) {
+                data.workers = formData.get('workers');
+            }
+
+            // Analysis control flags - send disable flags if unchecked
+            if (!formData.get('enable_dos')) {
+                data.disable_dos = 'true';
+            }
+            if (!formData.get('enable_fft')) {
+                data.disable_fft = 'true';
+            }
+            if (!formData.get('enable_analytical')) {
+                data.disable_analytical = 'true';
+            }
+            if (!formData.get('enable_fourier')) {
+                data.disable_fourier = 'true';
             }
 
             // Show loading

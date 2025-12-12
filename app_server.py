@@ -25,7 +25,7 @@ def simulate_sequence():
         mode = data.get('mode', 'HOMO')
         model = data.get('model', 'FISHBONE')
         symmetry = data.get('symmetry', 'symmetric')
-        disorder = data.get ('disorder', '0')
+        disorder = data.get('disorder', '0')
         dos_points = data.get('dos', '5')
         
         # Validate sequence
@@ -42,6 +42,26 @@ def simulate_sequence():
             '--disorder', disorder,
             '--number_of_DOS_points', dos_points
         ]
+        
+        # Add optional parameters
+        if data.get('seed'):
+            cmd.extend(['--seed', str(data.get('seed'))])
+        
+        if data.get('export'):
+            cmd.append('--export')
+        
+        if data.get('workers'):
+            cmd.extend(['--workers', str(data.get('workers'))])
+        
+        # Analysis control flags
+        if data.get('disable_dos'):
+            cmd.append('--disable-dos')
+        if data.get('disable_fft'):
+            cmd.append('--disable-fft')
+        if data.get('disable_analytical'):
+            cmd.append('--disable-analytical')
+        if data.get('disable_fourier'):
+            cmd.append('--disable-fourier')
         
         # Run simulation
         result = subprocess.run(
@@ -80,7 +100,7 @@ def simulate_structure():
         # Get other parameters
         mode = request.form.get('mode', 'HOMO')
         model = request.form.get('model', 'FISHBONE')
-        chain_direction = request.form.get('chain_direction', 'z')
+        chain_direction = request.form.get('chain-direction', 'z')
         symmetry = request.form.get('symmetry', 'symmetric')
         disorder = request.form.get('disorder', '0')
         dos_points = request.form.get('dos', '5')
@@ -103,6 +123,26 @@ def simulate_structure():
                 '--disorder', disorder,
                 '--number_of_DOS_points', dos_points
             ]
+            
+            # Add optional parameters
+            if request.form.get('seed'):
+                cmd.extend(['--seed', request.form.get('seed')])
+            
+            if request.form.get('export'):
+                cmd.append('--export')
+            
+            if request.form.get('workers'):
+                cmd.extend(['--workers', request.form.get('workers')])
+            
+            # Analysis control flags
+            if request.form.get('disable_dos'):
+                cmd.append('--disable-dos')
+            if request.form.get(' disable_fft'):
+                cmd.append('--disable-fft')
+            if request.form.get('disable_analytical'):
+                cmd.append('--disable-analytical')
+            if request.form.get('disable_fourier'):
+                cmd.append('--disable-fourier')
             
             # Run simulation
             result = subprocess.run(
