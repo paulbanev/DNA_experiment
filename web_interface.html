@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Transport Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        select,
+        .file-upload {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 2px dashed #ddd;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            background: #f9f9f9;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .results pre {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        .help-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .examples {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #ffa500;
+        }
+
+        .examples h4 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+        }
+
+        .examples code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 DNA Transport Simulation</h1>
+            <p>Quantum transport simulation for DNA and molecular systems</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('sequence')">
+                <span>📝 DNA Sequence</span>
+                <span class="badge">Original</span>
+            </div>
+            <div class="tab" onclick="switchTab('structure')">
+                <span>📁 Structure File</span>
+                <span class="badge">New!</span>
+            </div>
+        </div>
+
+        <!-- Sequence Input Tab -->
+        <div id="sequence-tab" class="tab-content active">
+            <form id="sequence-form">
+                <div class="form-group">
+                    <label for="sequence">DNA Sequence</label>
+                    <input type="text" id="sequence" name="sequence" placeholder="Enter DNA sequence (e.g., ATGCATGC)"
+                        required>
+                    <div class="help-text">Allowed bases: A, T, G, C, M (for A-C mismatch)</div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="mode-seq">Electronic Mode</label>
+                        <select id="mode-seq" name="mode" required>
+                            <option value="HOMO">HOMO</option>
+                            <option value="LUMO">LUMO</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model-seq">Transport Model</label>
+                        <select id="model-seq" name="model" required>
+                            <option value="FISHBONE">FISHBONE</option>
+                            <option value="WIRE">WIRE</option>
+                            <option value="LADDER">LADDER</option>
+                            <option value="EXTENDED_LADDER">EXTENDED LADDER</option>
+                            <option value="SPECIALE">SPECIALE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="symmetry-seq">Hopping Symmetry</label>
+                        <select id="symmetry-seq" name="symmetry" required>
+                            <option value="symmetric">Symmetric</option>
+                            <option value="asymmetric">Asymmetric</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="disorder-seq">Disorder Type</label>
+                        <select id="disorder-seq" name="disorder" required>
+                            <option value="0">0 - No Disorder</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dos-seq">Number of DOS Points</label>
+                    <input type="text" id="dos-seq" name="dos" value="5" required>
+                </div>
+
+                <div class="examples">
+                    <h4>💡 Examples:</h4>
+                    <p><code>AAAAA</code> - Simple adenine sequence</p>
+                    <p><code>ATGCATGC</code> - Mixed sequence</p>
+                    <p><code>GCGCGC</code> - Alternating G-C pairs</p>
+                </div>
+
+                <button type="submit" class="btn">Run Simulation</button>
+            </form>
+
+            <div class="loading" id="sequence-loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Running simulation...</p>
+            </div>
+
+            <div class="results" id="sequence-results">
+                <h3>Simulation Results</h3>
+                <pre id="sequence-output"></pre>
+            </div>
+        </div>
+
+        <!-- Structure File Tab -->
+        <div id="structure-tab" class="tab-content">
+            <form id="structure-form">
+                <div class="form-group">
+                    <label>Structure File (CIF, XYZ, or PDB)</label>
+                    <div class="file-upload" onclick="document.getElementById('structure-file').click()">
+                        <input type="file" id="structure-file" name="structure" accept=".cif,.xyz,.pdb" required>
+                        <div>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#667eea"
+                                stroke-width="2" style="margin: 0 auto; display: block;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p style="margin-top: 10px; color: #666;">Click to browse or drag & drop</p>
+                            <p style="font-size: 14px; color: #999;">Supported: .cif, .xyz, .pdb</p>
+                        </div>
+                        <div class="file-info" id="file-name"></div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="mode-struct">Electronic Mode</label>
+                        <select id="mode-struct" name="mode" required>
+                            <option value="HOMO">HOMO</option>
+                            <option value="LUMO">LUMO</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model-struct">Transport Model</label>
+                        <select id="model-struct" name="model" required>
+                            <option value="FISHBONE">FISHBONE</option>
+                            <option value="WIRE">WIRE</option>
+                            <option value="LADDER">LADDER</option>
+                            <option value="EXTENDED_LADDER">EXTENDED LADDER</option>
+                            <option value="SPECIALE">SPECIALE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="chain-direction">Chain Direction</label>
+                        <select id="chain-direction" name="chain-direction" required>
+                            <option value="x">X-axis</option>
+                            <option value="y">Y-axis</option>
+                            <option value="z" selected>Z-axis</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="symmetry-struct">Hopping Symmetry</label>
+                        <select id="symmetry-struct" name="symmetry" required>
+                            <option value="symmetric">Symmetric</option>
+                            <option value="asymmetric">Asymmetric</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="disorder-struct">Disorder Type</label>
+                        <select id="disorder-struct" name="disorder" required>
+                            <option value="0">0 - No Disorder</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dos-struct">Number of DOS Points</label>
+                        <input type="text" id="dos-struct" name="dos" value="5" required>
+                    </div>
+                </div>
+
+                <div class="examples">
+                    <h4>💡 Example Files:</h4>
+                    <p><code>example_chain.xyz</code> - 10-atom carbon chain</p>
+                    <p><code>example_benzene.cif</code> - Benzene molecule</p>
+                    <p><code>example_dna.pdb</code> - DNA base pair</p>
+                </div>
+
+                <button type="submit" class="btn">Run Simulation</button>
+            </form>
+
+            <div class="loading" id="structure-loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Running simulation...</p>
+            </div>
+
+            <div class="results" id="structure-results">
+                <h3>Simulation Results</h3>
+                <pre id="structure-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // File upload handling
+        document.getElementById('structure-file').addEventListener('change', function (e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('file-name').textContent = '✓ ' + fileName;
+            }
+        });
+
+        // Sequence form submission
+        document.getElementById('sequence-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const sequence = formData.get('sequence');
+            const mode = formData.get('mode');
+            const model = formData.get('model');
+            const symmetry = formData.get('symmetry');
+            const disorder = formData.get('disorder');
+            const dos = formData.get('dos');
+
+            // Show loading
+            document.getElementById('sequence-loading').classList.add('show');
+            document.getElementById('sequence-results').classList.remove('show');
+
+            try {
+                // Build command
+                const command = `python main.py --sequence ${sequence} --mode ${mode} --model ${model} --symmetry ${symmetry} --disorder ${disorder} --number_of_DOS_points ${dos}`;
+
+                // Show command being run
+                document.getElementById('sequence-output').textContent = `Running command:\n${command}\n\nThis would execute the simulation...\n\n(Note: This is a static demo. Connect to backend for live results)`;
+
+                // Simulate delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Show results
+                document.getElementById('sequence-loading').classList.remove('show');
+                document.getElementById('sequence-results').classList.add('show');
+            } catch (error) {
+                document.getElementById('sequence-output').textContent = 'Error: ' + error.message;
+                document.getElementById('sequence-loading').classList.remove('show');
+                document.getElementById('sequence-results').classList.add('show');
+            }
+        });
+
+        // Structure form submission
+        document.getElementById('structure-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const file = formData.get('structure');
+            const mode = formData.get('mode');
+            const model = formData.get('model');
+            const chainDir = formData.get('chain-direction');
+            const symmetry = formData.get('symmetry');
+            const disorder = formData.get('disorder');
+            const dos = formData.get('dos');
+
+            // Show loading
+            document.getElementById('structure-loading').classList.add('show');
+            document.getElementById('structure-results').classList.remove('show');
+
+            try {
+                // Build command
+                const command = `python main.py --structure ${file.name} --mode ${mode} --model ${model} --chain-direction ${chainDir} --symmetry ${symmetry} --disorder ${disorder} --number_of_DOS_points ${dos}`;
+
+                // Show command being run
+                document.getElementById('structure-output').textContent = `Running command:\n${command}\n\nStructure file: ${file.name} (${file.size} bytes)\nFile type: ${file.name.split('.').pop().toUpperCase()}\n\nThis would execute the simulation...\n\n(Note: This is a static demo. Connect to backend for live results)`;
+
+                // Simulate delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Show results
+                document.getElementById('structure-loading').classList.remove('show');
+                document.getElementById('structure-results').classList.add('show');
+            } catch (error) {
+                document.getElementById('structure-output').textContent = 'Error: ' + error.message;
+                document.getElementById('structure-loading').classList.remove('show');
+                document.getElementById('structure-results').classList.add('show');
+            }
+        });
+    </script>
+</body>
+
+</html>

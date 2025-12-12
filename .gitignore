@@ -35,3 +35,18 @@ codegen/
 # buildtool cache folder
 .buildtool/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Generated results (optional - uncomment to track plots)
+python/results/*.png
+python/results/*.pdf
+
+# Virtual environments
+venv/
+env/
+ENV/

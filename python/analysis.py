@@ -46,7 +46,7 @@ def computations(NN, A, MD, eVperhbar, t, L, h):
         lambda_vals = np.zeros(MD, dtype=complex)
         for k in range(MD):
             lambda_vals[k] = -1j * eVperhbar * D[k, k]  # Matrix A
-        print("λ (lambda):", lambda_vals)
+        print("lambda:", lambda_vals)
 
         if np.allclose(lambda_vals.real, np.zeros(MD)):
             print("Sum of periodic functions.")
