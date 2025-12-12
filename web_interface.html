@@ -451,6 +451,17 @@
             <div class="results" id="sequence-results">
                 <h3>Simulation Results</h3>
                 <pre id="sequence-output"></pre>
+
+                <!-- Plots Section -->
+                <div id="sequence-plots" style="margin-top: 30px; display: none;">
+                    <h3 style="border-top: 2px solid #667eea; padding-top: 20px;">📊 Visualization Plots</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                        Vector graphics (SVG) - zoom in without quality loss! Right-click any plot to save.
+                    </p>
+                    <div style="display: grid; gap: 20px;">
+                        <!-- Each plot will be inserted here -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -617,6 +628,17 @@
             <div class="results" id="structure-results">
                 <h3>Simulation Results</h3>
                 <pre id="structure-output"></pre>
+
+                <!-- Plots Section -->
+                <div id="structure-plots" style="margin-top: 30px; display: none;">
+                    <h3 style="border-top: 2px solid #667eea; padding-top: 20px;">📊 Visualization Plots</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                        Vector graphics (SVG) - zoom in without quality loss! Right-click any plot to save.
+                    </p>
+                    <div style="display: grid; gap: 20px;">
+                        <!-- Each plot will be inserted here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -673,6 +695,84 @@
                 document.getElementById('file-name').textContent = '✓ ' + fileName;
             }
         });
+
+        // Function to display SVG plots
+        function displayPlots(plots, containerId) {
+            const plotsContainer = document.getElementById(containerId);
+            const plotsGrid = plotsContainer.querySelector('div');
+
+            if (!plots || Object.keys(plots).length === 0) {
+                plotsContainer.style.display = 'none';
+                return;
+            }
+
+            // Clear previous plots
+            plotsGrid.innerHTML = '';
+
+            // Plot titles mapping
+            const plotTitles = {
+                'eigenvalue_spectrum': 'Eigenvalue Spectrum',
+                'participation_ratio': 'Participation Ratio',
+                'mean_probability': 'Mean Probability per Site',
+                'mean_transfer_rate': 'Mean Transfer Rate (log scale)',
+                'density_of_states': 'Density of States (DOS)'
+            };
+
+            // Display each plot
+            for (const [key, base64Data] of Object.entries(plots)) {
+                const plotDiv = document.createElement('div');
+                plotDiv.style.cssText = `
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    border: 1px solid #e1e4e8;
+                `;
+
+                const title = document.createElement('h4');
+                title.textContent = plotTitles[key] || key;
+                title.style.cssText = `
+                    margin: 0 0 15px 0;
+                    color: #667eea;
+                    font-size: 16px;
+                `;
+
+                const img = document.createElement('img');
+                img.src = `data:image/svg+xml;base64,${base64Data}`;
+                img.alt = plotTitles[key] || key;
+                img.style.cssText = `
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                    cursor: zoom-in;
+                `;
+
+                // Click to open in new window at full size
+                img.addEventListener('click', function () {
+                    const win = window.open('', '_blank');
+                    win.document.write(`
+                        <html>
+                            <head>
+                                <title>${plotTitles[key] || key}</title>
+                                <style>
+                                    body { margin: 0; padding: 20px; background: #f5f5f5; }
+                                    img { max-width: 100%; height: auto; display: block; margin: 0 auto; background: white; }
+                                </style>
+                            </head>
+                            <body>
+                                <img src="data:image/svg+xml;base64,${base64Data}" alt="${plotTitles[key] || key}">
+                            </body>
+                        </html>
+                    `);
+                });
+
+                plotDiv.appendChild(title);
+                plotDiv.appendChild(img);
+                plotsGrid.appendChild(plotDiv);
+            }
+
+            plotsContainer.style.display = 'block';
+        }
 
         // Sequence form submission
         document.getElementById('sequence-form').addEventListener('submit', async function (e) {
@@ -739,6 +839,11 @@
                         `Command: ${result.command}\n\n` +
                         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
                         result.output;
+
+                    // Display plots if available
+                    if (result.plots) {
+                        displayPlots(result.plots, 'sequence-plots');
+                    }
                 } else {
                     // Show error
                     document.getElementById('sequence-output').textContent =
@@ -787,6 +892,11 @@
                         `Command: ${result.command}\n\n` +
                         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
                         result.output;
+
+                    // Display plots if available
+                    if (result.plots) {
+                        displayPlots(result.plots, 'structure-plots');
+                    }
                 } else {
                     // Show error
                     document.getElementById('structure-output').textContent =

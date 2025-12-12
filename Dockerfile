@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r /app/python/requirements.txt
 # Install Flask and CORS
 RUN pip install --no-cache-dir flask flask-cors
 
+# Install openpyxl for Excel export
+RUN pip install --no-cache-dir openpyxl
+
 # Copy application code
 COPY . /app
 

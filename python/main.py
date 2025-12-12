@@ -5,7 +5,8 @@ from disorder import get_disorder_model
 from analysis import computations
 from sequence import sequence_properties, validate_sequence
 from structure_reader import structure_properties
-from visualization import save_plots
+from visualization import save_plots, generate_plots_svg
+import json
 
 L = 64 * 16385
 t = np.linspace(0, 100000, L)
@@ -138,6 +139,16 @@ def main():
         print("Results exported to Excel.")
 
     save_plots(results)
+    
+    # Generate plots as SVG for web display
+    try:
+        plots_svg = generate_plots_svg(results)
+        # Output plots as JSON so backend can capture them
+        print("\n<<<PLOTS_JSON_START>>>")
+        print(json.dumps(plots_svg))
+        print("<<<PLOTS_JSON_END>>>")
+    except Exception as e:
+        print(f"Warning: Could not generate SVG plots: {e}")
 
 if __name__ == '__main__':
     main()

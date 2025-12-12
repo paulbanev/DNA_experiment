@@ -72,11 +72,30 @@ def simulate_sequence():
             timeout=300  # 5 minute timeout
         )
         
+        # Extract plots from output
+        plots = {}
+        output = result.stdout
+        if '<<<PLOTS_JSON_START>>>' in output and '<<<PLOTS_JSON_END>>>' in output:
+            try:
+                import json
+                start_marker = '<<<PLOTS_JSON_START>>>'
+                end_marker = '<<<PLOTS_JSON_END>>>'
+                start_idx = output.find(start_marker) + len(start_marker)
+                end_idx = output.find(end_marker)
+                plots_json = output[start_idx:end_idx].strip()
+                plots = json.loads(plots_json)
+                # Remove plots JSON from output display
+                output = output[:output.find(start_marker)] + output[end_idx + len(end_marker):]
+                output = output.strip()
+            except Exception as e:
+                print(f"Error extracting plots: {e}")
+        
         return jsonify({
             'success': result.returncode == 0,
-            'output': result.stdout,
+            'output': output,
             'error': result.stderr,
-            'command': ' '.join(cmd)
+            'command': ' '.join(cmd),
+            'plots': plots  # Include plots in response
         })
         
     except subprocess.TimeoutExpired:
@@ -153,12 +172,31 @@ def simulate_structure():
                 timeout=300
             )
             
+            # Extract plots from output
+            plots = {}
+            output = result.stdout
+            if '<<<PLOTS_JSON_START>>>' in output and '<<<PLOTS_JSON_END>>>' in output:
+                try:
+                    import json
+                    start_marker = '<<<PLOTS_JSON_START>>>'
+                    end_marker = '<<<PLOTS_JSON_END>>>'
+                    start_idx = output.find(start_marker) + len(start_marker)
+                    end_idx = output.find(end_marker)
+                    plots_json = output[start_idx:end_idx].strip()
+                    plots = json.loads(plots_json)
+                    # Remove plots JSON from output display
+                    output = output[:output.find(start_marker)] + output[end_idx + len(end_marker):]
+                    output = output.strip()
+                except Exception as e:
+                    print(f"Error extracting plots: {e}")
+            
             return jsonify({
                 'success': result.returncode == 0,
-                'output': result.stdout,
+                'output': output,
                 'error': result.stderr,
                 'command': ' '.join(cmd),
-                'filename': file.filename
+                'filename': file.filename,
+                'plots': plots  # Include plots in response
             })
             
         finally:
